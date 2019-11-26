@@ -1,7 +1,7 @@
 const route = require('express').Router()
 
 route.
-	get('/post', (req, res) => {
+	post('/poduct', (req, res) => {
 		res.send('post')
 	})
 

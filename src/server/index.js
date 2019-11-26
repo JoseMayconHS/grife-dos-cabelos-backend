@@ -1,6 +1,8 @@
 require('dotenv').config()
 const express = require('express')
 
+require('../data')
+
 const port = process.env.PORT
 
 const app = express()
