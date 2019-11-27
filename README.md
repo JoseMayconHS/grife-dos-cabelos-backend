@@ -1,8 +1,13 @@
 # grife-dos-cabelos-API
-API para auxiliar no desenvolvimento do aplicativo
+API para auxiliar no desenvolvimento do aplicativo.
 
-
-# Dimenções de imagens
+## Dimenções de imagens
 	- pequena 27x43;
-	- media 61x97;
-	- garnde 81x129
+	- média 61x97;
+	- grande 81x129
+
+## Endpointers
+	- STATIC
+		- `/files` : serve arquivos estáticos;
+	- POST
+		- `/product` : criar um produto.	
