@@ -12,11 +12,31 @@ const Product =  new Schema({
 		type: [String]
 	},
 	thumbnail: {
-		type: String
+		folder: {
+			type: String,
+			required: true
+		},
+		files: {
+			s: {
+				type: String,
+				required: true
+			},
+			m: {
+				type: String,
+				required: true
+			},
+			l: {
+				type: String,
+				required: true
+			}
+		}
 	},
 	price: {
 		_from: Number,
-		to: Number
+		to: {
+			type: Number,
+			required: true
+		}
 	},
 	brand: {
 		type: String,
