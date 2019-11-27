@@ -1,13 +1,13 @@
 require('dotenv').config()
-const express = require('express')
+const express = require('express'),
+  path = require('path'),
+  port = process.env.PORT || 3030,
+  app = express()
 
 require('../data')
 
-const port = process.env.PORT
-
-const app = express()
-
 app.use(express.json())
+app.use('/files', express.static(path.resolve(__dirname, '..', 'static')))
 
 require('./routes')(app)
 

@@ -5,7 +5,7 @@ const path = require('path'),
 module.exports = {
 	store(req, res) {
 
-		function delFolder(dir) {
+		function delFolder() {
 			return new Promise((resolve, reject) => {
 				try {
 					const thumbnail = path.parse(req.files.thumbnail_s[0].originalname).name,
