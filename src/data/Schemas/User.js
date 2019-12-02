@@ -12,7 +12,11 @@ const User = new Schema({
 	password: {
 		type: String,
 		required: true
-	}
+	},
+	bag: [{
+		productId: Schema.Types.ObjectId,
+		qtd: Number
+	}]
 }, {
 	timestamps: true
 })
