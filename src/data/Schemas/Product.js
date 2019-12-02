@@ -42,6 +42,10 @@ const Product =  new Schema({
 		type: String,
 		required: true
 	},
+	type: {
+		type: String,
+		required: true
+	},
 	promotion: {
 		type: Boolean,
 		default: false

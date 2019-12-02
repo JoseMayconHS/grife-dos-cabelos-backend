@@ -30,7 +30,7 @@ module.exports = {
 		}
 
 		try {
-			const { title,  description, brand } = req.body,
+			const { title,  description, brand, type } = req.body,
 				thumbnails = req.files,
 				thumbnail = path.parse(req.files.thumbnail_s[0].originalname).name
 
@@ -57,6 +57,7 @@ module.exports = {
 					_from: price_from,
 					to: price_to
 				},
+				type,
 				promotion
 			}
 
@@ -69,13 +70,32 @@ module.exports = {
 						.finally(() => {
 							res.status(400).json({ err })
 						})
-				}) 
-		
+				})
+
 		} catch(err) {
 			delFolder(dir)
 				.finally(() => {
 					res.status(500).json({ err })
 				})
 		}
+	},
+
+	indexBy(req, res) {
+		try {
+			const where = req.query
+
+			Product.find(where)
+				.then(Documents => {
+					res.status(200).json(Documents)
+				})
+				.catch(error => {
+					throw error
+				})
+
+			
+		} catch(error) {
+			res.status(500).json({ error })
+		}
+
 	}
 }

@@ -1,6 +1,7 @@
 const route = require('express').Router(),
 	multer = require('multer'),
 	productControllers = require('../controllers/product'),
+	userControllers = require('../controllers/user'),
 	product = require('../../../upload').storageProduct,
 	user = require('../../../upload').storageUser,
 	upProduct = multer({ storage: product }),
@@ -8,12 +9,14 @@ const route = require('express').Router(),
 	fieldsThumbnails = [
 		{ name: 'thumbnail_s', maxCount: 1 },
 		{ name: 'thumbnail_m', maxCount: 1 },
-		{ name: 'thumbnail_l', maxCount: 1 }
+		{ name: 'thumbnail_l', maxCount: 1 },
+		{ name: 'thumbnail_p', maxCount: 1 }
 	]
 	
 
-route.
-	post('/product', upProduct.fields(fieldsThumbnails), productControllers.store)
+route
+	.post('/product', upProduct.fields(fieldsThumbnails), productControllers.store)
+	.post('/user', upProduct.fields(fieldsThumbnails), userControllers.store)
 
 
 module.exports = app => app.use(route)
