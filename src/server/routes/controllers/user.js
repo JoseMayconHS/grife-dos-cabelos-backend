@@ -1,17 +1,29 @@
 const bcryptjs = require('bcryptjs'),
   User = require('../../../data/Schemas/User')
 
+const limit = 2  
+
 module.exports = {
   indexAll(req, res) {
     try {
 
-      User.find({}, 'name cellphone')
-        .then(Documents => {
-          res.status(200).json(Documents)
-        })
-        .catch(error => {
-          throw error
-        })
+      User.countDocuments((err, count) => {
+        if (err) {
+          throw err
+        } else {
+          const { page } = req.query
+
+          User.find({}, 'name cellphone')
+            .limit(limit)
+            .skip(limit * page - page)
+            .then(Documents => {
+              res.status(200).json(Documents)
+            })
+            .catch(error => {
+              throw error
+            })
+        }
+      })
 
     } catch(error) {
       res.status(500).json({ error })

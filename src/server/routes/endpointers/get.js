@@ -5,6 +5,6 @@ const route = require('express').Router(),
 route
 	.get('/product?:type', productControllers.indexBy)
 	.get('/product', productControllers.indexAll)
-	.get('/user', userControllers.indexAll)
+	.get('/user?:page', userControllers.indexAll)
 
 module.exports = app => app.use(route)
