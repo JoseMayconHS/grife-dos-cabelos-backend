@@ -18,7 +18,7 @@ module.exports = {
             .skip((limit * page) - limit)
             .sort('-createdAt')
             .then(Documents => {
-              res.status(200).json(Documents)
+              res.status(200).json({ data: Documents, limit, count })
             })
             .catch(error => {
               throw error

@@ -20,3 +20,6 @@ API para auxiliar no desenvolvimento do aplicativo.
 		-	`/product?:type` : realiza um filtro nos produtos;
 		- `/product` : busca todos os produtos;
 		- `/user` : busca todos os usuários.
+	- PUT
+		- `/product/:id` : Atualiza um produto;
+		- `/user/:id` : Atualiza um usuário.
