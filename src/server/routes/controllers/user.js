@@ -15,7 +15,8 @@ module.exports = {
 
           User.find({}, 'name cellphone')
             .limit(limit)
-            .skip(limit * page - page)
+            .skip((limit * page) - limit)
+            .sort('-createdAt')
             .then(Documents => {
               res.status(200).json(Documents)
             })
