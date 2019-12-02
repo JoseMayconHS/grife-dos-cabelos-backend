@@ -18,4 +18,5 @@ API para auxiliar no desenvolvimento do aplicativo.
 		- `/user/signin` : realiza o login do usuário.
 	- GET
 		-	`/product?:type` : realiza um filtro nos produtos;
-		- `/product` : busca todos os produtos.
+		- `/product` : busca todos os produtos;
+		- `/user` : busca todos os usuários.
