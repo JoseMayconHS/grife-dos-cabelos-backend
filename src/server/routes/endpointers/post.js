@@ -16,8 +16,8 @@ const route = require('express').Router(),
 
 route
 	.post('/product', upProduct.fields(fieldsThumbnails), productControllers.store)
-	.post('/user/signup', upProduct.fields(fieldsThumbnails), userControllers.store)
-	.post('/user/signin', upProduct.fields(fieldsThumbnails), userControllers.sign)
+	.post('/user/signup', userControllers.store)
+	.post('/user/signin', userControllers.sign)
 
 
 module.exports = app => app.use(route)

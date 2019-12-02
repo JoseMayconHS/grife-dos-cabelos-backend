@@ -3,6 +3,21 @@ const path = require('path'),
 	Product = require('../../../data/Schemas/Product')
 
 module.exports = {
+	indexAll(req, res) {
+		try {
+
+			Product.find()
+				.then(Documents => {
+					res.status(200).json(Documents)
+				})
+				.catch(error => {
+					throw error
+				})
+
+		} catch(error) {
+			res.status(500).json({ error })
+		}
+	},
 	store(req, res) {
 
 		function delFolder() {

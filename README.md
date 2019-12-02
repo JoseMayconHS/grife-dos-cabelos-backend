@@ -11,6 +11,11 @@ API para auxiliar no desenvolvimento do aplicativo.
 
 ## Endpointers
 	- STATIC
-		- `/files` : serve arquivos estáticos;
+		- `/files` : serve arquivos estáticos.
 	- POST
-		- `/product` : criar um produto.	
+		- `/product` : criar um produto;
+		- `/user/signup` : cria um usuário;
+		- `/user/signin` : realiza o login do usuário.
+	- GET
+		-	`/product?:type` : realiza um filtro nos produtos;
+		- `/product` : busca todos os produtos.
