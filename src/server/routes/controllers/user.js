@@ -1,16 +1,24 @@
-const User = require('../../../data/Schemas/User')
+const bcryptjs = require('bcryptjs'),
+  User = require('../../../data/Schemas/User')
 
 module.exports = {
   store(req, res) {
     try {
       
-      const { name, cellphone, password } = req.body
+      const { name, cellphone } = req.body
+
+      let { password } = req.body
 
       User.findOne({ name })
         .then(Documents => {
 
           if (!Documents) {
             try {
+
+              const salt = bcryptjs.genSaltSync(10)
+
+              password = bcryptjs.hashSync(password, salt)
+
               User.create({ name, cellphone, password })
               .then(user => {
                 res.status(201).json(user)
