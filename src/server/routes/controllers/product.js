@@ -95,6 +95,30 @@ module.exports = {
 		}
 	},
 
+	update(req, res) {
+    try {
+			const { id: _id } = req.params,
+				document = req.body
+
+			Product.updateOne({ _id }, document)
+					.then(rows => {
+
+						if (rows.nModified) {
+							res.status(200).json({ message: 'Atualizado' })
+						} else {
+							res.status(200).json({ message: 'Nada foi alterado' })
+						}
+
+					})
+					.catch(error => {
+						throw error
+					})
+
+		} catch(error) {
+			res.status(500).json({ error })
+		}
+  },
+
 	indexBy(req, res) {
 		try {
 			const where = req.query

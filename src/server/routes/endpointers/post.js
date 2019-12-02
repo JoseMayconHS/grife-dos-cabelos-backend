@@ -13,11 +13,9 @@ const route = require('express').Router(),
 		{ name: 'thumbnail_p', maxCount: 1 }
 	]
 	
-
 route
 	.post('/product', upProduct.fields(fieldsThumbnails), productControllers.store)
 	.post('/user/signup', userControllers.store)
 	.post('/user/signin', userControllers.sign)
-
 
 module.exports = app => app.use(route)

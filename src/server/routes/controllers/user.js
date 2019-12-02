@@ -69,6 +69,10 @@ module.exports = {
     }
   },
 
+  update(req, res) {
+    res.send('ok')
+  },
+
   sign(req, res) {
     try {
 
