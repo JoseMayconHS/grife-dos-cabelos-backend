@@ -45,16 +45,16 @@ module.exports = {
 		}
 
 		try {
-			const { title,  description, brand, type } = req.body,
+			const { title,  description, brand, type, combo } = req.body,
 				thumbnails = req.files,
 				thumbnail = path.parse(req.files.thumbnail_s[0].originalname).name
 
 			let { item_included, price_from, price_to, promotion } = req.body
 
-			item_included = item_included.split('@')
-			price_from = +price_from
+			item_included = item_included.split(',')
+			// price_from = +price_from  (Ao criar um produto, não tem preço anterior)
 			price_to = +price_to
-			promotion = promotion == '0' ? false : true
+			// promotion = promotion == '0' ? false : true (Ao criar, inicialmente não estará como promoção)
 
 			const _document = {
 				title,
@@ -65,15 +65,17 @@ module.exports = {
 					files: {
 						s: thumbnails.thumbnail_s[0].filename,
 						m: thumbnails.thumbnail_m[0].filename,
-						l: thumbnails.thumbnail_l[0].filename
+						l: thumbnails.thumbnail_l[0].filename,
+						p: thumbnails.thumbnail_p[0].filename
 					}
 				},
 				price: {
-					_from: price_from,
+					// _from: price_from,
 					to: price_to
 				},
 				type,
-				promotion
+				combo,
+				// promotion
 			}
 
 			Product.create(_document)

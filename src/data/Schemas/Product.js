@@ -28,11 +28,18 @@ const Product =  new Schema({
 			l: {
 				type: String,
 				required: true
+			},
+			p: {
+				type: String,
+				required: true
 			}
 		}
 	},
 	price: {
-		_from: Number,
+		_from: {
+			type: Number,
+			default: 0
+		},
 		to: {
 			type: Number,
 			required: true
@@ -47,6 +54,10 @@ const Product =  new Schema({
 		required: true
 	},
 	promotion: {
+		type: Boolean,
+		default: false
+	},
+	combo: {
 		type: Boolean,
 		default: false
 	}
