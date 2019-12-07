@@ -16,9 +16,19 @@ exports.storageProduct = multer.diskStorage({
     cb(null, dir)
   },
   filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}.jpg`)
+    const ext = path.extname(file.originalname)
+
+    cb(null, `thumbnail${ext}`)
   }
 })
+
+exports.fileFilter = function(req, file, cb) {
+  const ext = path.extname(file.originalname)
+
+  const valids = ['.svg', '.png', '.jpg', '.jpeg']
+
+  cb(null, valids.includes(ext))
+}
 
 exports.storageUser = multer.diskStorage({
   destination: function (req, file, cb) {

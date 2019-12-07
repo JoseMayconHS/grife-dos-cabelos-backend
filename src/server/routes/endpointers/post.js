@@ -3,18 +3,13 @@ const route = require('express').Router(),
 	productControllers = require('../controllers/product'),
 	userControllers = require('../controllers/user'),
 	product = require('../../../upload').storageProduct,
+	fileFilter = require('../../../upload').fileFilter,
 	user = require('../../../upload').storageUser,
-	upProduct = multer({ storage: product }),
-	upUser = multer({ storage: user }),
-	fieldsThumbnails = [
-		{ name: 'thumbnail_s', maxCount: 1 },
-		{ name: 'thumbnail_m', maxCount: 1 },
-		{ name: 'thumbnail_l', maxCount: 1 },
-		{ name: 'thumbnail_p', maxCount: 1 }
-	]
+	upProduct = multer({ storage: product, fileFilter }),
+	upUser = multer({ storage: user })
 	
 route
-	.post('/product', upProduct.fields(fieldsThumbnails), productControllers.store)
+	.post('/product', upProduct.single('thumbnail'), productControllers.store)
 	.post('/user/signup', userControllers.store)
 	.post('/user/signin', userControllers.sign)
 

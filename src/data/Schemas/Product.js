@@ -12,28 +12,8 @@ const Product =  new Schema({
 		type: [String]
 	},
 	thumbnail: {
-		folder: {
-			type: String,
-			required: true
-		},
-		files: {
-			s: {
-				type: String,
-				required: true
-			},
-			m: {
-				type: String,
-				required: true
-			},
-			l: {
-				type: String,
-				required: true
-			},
-			p: {
-				type: String,
-				required: true
-			}
-		}
+		type: String,
+		required: true
 	},
 	price: {
 		_from: {
@@ -57,10 +37,12 @@ const Product =  new Schema({
 		type: Boolean,
 		default: false
 	},
-	combo: {
-		type: Boolean,
-		default: false
+	insired: {
+		type: String,
+		required: true
 	}
+}, {
+	timestamps: { updatedAt: 'updated_at', createdAt: 'created_at' }
 })
 
 module.exports = model('product', Product)

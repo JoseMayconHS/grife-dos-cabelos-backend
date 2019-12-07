@@ -23,7 +23,7 @@ module.exports = {
 		function delFolder() {
 			return new Promise((resolve, reject) => {
 				try {
-					const thumbnail = path.parse(req.files.thumbnail_s[0].originalname).name,
+					const thumbnail = path.parse(req.file.originalname).name,
 						dir = path.resolve(__dirname, '..', '..', '..', 'static', 'products', thumbnail)
 
 					if (fs.existsSync(dir)) {
@@ -45,36 +45,30 @@ module.exports = {
 		}
 
 		try {
-			const { title,  description, brand, type, combo } = req.body,
-				thumbnails = req.files,
-				thumbnail = path.parse(req.files.thumbnail_s[0].originalname).name
+			const { title,  description, brand, type } = req.body,
+				thumbnail = req.file.filename
 
 			let { item_included, price_from, price_to, promotion } = req.body
 
-			item_included = item_included.split(',')
+			item_included = item_included
+				.split(',')
+				.map(str => str.trim())
 			// price_from = +price_from  (Ao criar um produto, não tem preço anterior)
 			price_to = +price_to
 			// promotion = promotion == '0' ? false : true (Ao criar, inicialmente não estará como promoção)
 
 			const _document = {
 				title,
-				item_included, description,
+				item_included, 
+				description: description.trim(),
 				brand,
-				thumbnail: {
-					folder: thumbnail,
-					files: {
-						s: thumbnails.thumbnail_s[0].filename,
-						m: thumbnails.thumbnail_m[0].filename,
-						l: thumbnails.thumbnail_l[0].filename,
-						p: thumbnails.thumbnail_p[0].filename
-					}
-				},
+				thumbnail,
 				price: {
 					// _from: price_from,
 					to: price_to
 				},
 				type,
-				combo,
+				insired: new Date().toLocaleString()
 				// promotion
 			}
 
@@ -83,14 +77,14 @@ module.exports = {
 					res.status(201).json({ product })
 				})
 				.catch(err => {
-					delFolder(dir)
+					delFolder()
 						.finally(() => {
 							res.status(400).json({ err })
 						})
 				})
 
 		} catch(err) {
-			delFolder(dir)
+			delFolder()
 				.finally(() => {
 					res.status(500).json({ err })
 				})
