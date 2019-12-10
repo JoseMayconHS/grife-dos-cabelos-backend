@@ -22,8 +22,13 @@ const User = new Schema({
 			title: {
 				type: String,
 				required: true
-			}, brand: {
+			}, 
+			brand: {
 				type: String,
+				required: true
+			},
+			price: {
+				type: Number,
 				required: true
 			},
 			thumbnail: String,
