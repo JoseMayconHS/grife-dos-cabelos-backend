@@ -13,10 +13,24 @@ const User = new Schema({
 		type: String,
 		required: true
 	},
-	bag: [{
-		productId: Schema.Types.ObjectId,
-		qtd: Number
-	}]
+	bag: {
+		actual: [{
+			productId: {
+				type: Schema.Types.ObjectId,
+				required: true
+			},
+			title: {
+				type: String,
+				required: true
+			}, brand: {
+				type: String,
+				required: true
+			},
+			thumbnail: String,
+			qtd: Number
+		}],
+		saves: Object
+	}
 }, {
 	timestamps: true
 })
