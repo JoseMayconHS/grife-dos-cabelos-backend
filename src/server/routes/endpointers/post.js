@@ -2,15 +2,17 @@ const route = require('express').Router(),
 	multer = require('multer'),
 	productControllers = require('../controllers/product'),
 	userControllers = require('../controllers/user'),
+	brandControllers = require('../controllers/brand'),
 	product = require('../../../upload').storageProduct,
 	fileFilter = require('../../../upload').fileFilter,
-	user = require('../../../upload').storageUser,
+	brand = require('../../../upload').storageBrand,
 	upProduct = multer({ storage: product, fileFilter }),
-	upUser = multer({ storage: user })
+	upBrand = multer({ storage: brand, fileFilter })
 	
 route
-	.post('/product', upProduct.single('thumbnail'), productControllers.store)
-	.post('/user/signup', userControllers.store)
-	.post('/user/signin', userControllers.sign)
+	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
+	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
+	.post('/app/user/signup', userControllers.store)
+	.post('/app/user/signin', userControllers.sign)
 
 module.exports = app => app.use(route)

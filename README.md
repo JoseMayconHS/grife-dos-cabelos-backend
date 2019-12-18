@@ -9,13 +9,20 @@ API para auxiliar no desenvolvimento do aplicativo.
 - STATIC
 	- `/files` : serve arquivos estáticos.
 - POST
-	- `/product` : criar um produto;
-	- `/user/signup` : cria um usuário;
-	- `/user/signin` : realiza o login do usuário.
+	- `/app/user/signup` : Cria um usuário;
+	- `/app/user/signin` : Realiza o login do usuário;
+	- `/admin/dashboard/brand` : Cria uma marca;
+	- `/admin/dashboard/product` : Cria um produto.
 - GET
-	-	`/product?:type` : realiza um filtro nos produtos;
-	- `/product` : busca todos os produtos;
-	- `/user` : busca todos os usuários.
+	- `/both/brand/:page` : Busca marcas;
+	-	`/both/product/by/:page` : realiza um filtro nos produtos;
+	- `/both/product/:page` : busca todos os produtos;
+	- `/admin/dashboard/user/:page` : busca todos os usuários.
 - PUT
-	- `/product/:id` : Atualiza um produto;
-	- `/user/:id` : Atualiza um usuário.
+	- `/app/user/:id` : Atualiza um usuário;
+	- `/admin/dashboard/product/:id` : Atualiza um produto;	
+	- `/admin/dashboard/brand/:_id` : Atualiza uma marca.
+- DELETE
+	- `/admin/dashboard/brand/:_id` : Delete uma marca;
+	- `/admin/dashboard/product/:_id` : Deleta um produto;
+	- `/admin/dashboard/user/:_id` : Deleta um cliente;

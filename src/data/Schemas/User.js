@@ -3,7 +3,8 @@ const { Schema, model } = require('mongoose')
 const User = new Schema({
 	username: {
 		type: String,
-		required: true
+		required: true,
+		unique: true
 	},
 	cellphone: {
 		type: String,
@@ -40,7 +41,10 @@ const User = new Schema({
 				default: 1
 			}
 		}],
-		saves: Object
+		saves: {
+			type: Object,
+			default: {}
+		}
 	}
 }, {
 	timestamps: { updatedAt: 'updated_at', createdAt: 'created_at' }

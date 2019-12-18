@@ -3,7 +3,8 @@ const { Schema, model } = require('mongoose')
 const Brand = new Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   }, 
   products: {
     type: Number,

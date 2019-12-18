@@ -30,11 +30,21 @@ exports.fileFilter = function(req, file, cb) {
   cb(null, valids.includes(ext))
 }
 
-exports.storageUser = multer.diskStorage({
+exports.storageBrand = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.resolve(__dirname, '..', 'static', 'users'))
+    const newFolder = path.parse(file.originalname).name,
+    dir = path.resolve(__dirname, '..', 'static', 'brands', newFolder)
+
+
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir)
+    }
+
+    cb(null, dir)
   },
   filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}.jpg`)
+    const ext = path.extname(file.originalname)
+
+    cb(null, `thumbnail${ext}`)
   }
 })

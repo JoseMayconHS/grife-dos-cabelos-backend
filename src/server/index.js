@@ -11,4 +11,4 @@ app.use('/files', express.static(path.resolve(__dirname, '..', 'static')))
 
 require('./routes')(app)
 
-app.listen(port, err => console.log(err ? 'Ocorreu um erro' : 'Servidor online'))
+app.listen(port, err => console.log(err ? 'Ocorreu um erro' : `Servidor online na porta ${port}`))
