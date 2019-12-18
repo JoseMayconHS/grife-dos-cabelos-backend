@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose')
 
 const User = new Schema({
-	name: {
+	username: {
 		type: String,
 		required: true
 	},
@@ -31,13 +31,19 @@ const User = new Schema({
 				type: Number,
 				required: true
 			},
-			thumbnail: String,
-			qtd: Number
+			thumbnail: {
+				type: String,
+				required: true
+			},
+			qtd: {
+				type: Number,
+				default: 1
+			}
 		}],
 		saves: Object
 	}
 }, {
-	timestamps: true
+	timestamps: { updatedAt: 'updated_at', createdAt: 'created_at' }
 })
 
 module.exports = model('user', User)

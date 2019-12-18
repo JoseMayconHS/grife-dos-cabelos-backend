@@ -6,7 +6,8 @@ const Product =  new Schema({
 		required: true
 	},
 	description: {
-		type: String
+		type: String,
+		default: ''
 	},
 	item_included: {
 		type: [String]
@@ -29,6 +30,10 @@ const Product =  new Schema({
 		type: String,
 		required: true
 	},
+	brand_id: {
+		type: Schema.Types.ObjectId,
+		required: true
+	},
 	type: {
 		type: String,
 		required: true
@@ -38,6 +43,10 @@ const Product =  new Schema({
 		default: false
 	},
 	insired: {
+		type: String,
+		required: true
+	},
+	updated: {
 		type: String,
 		required: true
 	}
