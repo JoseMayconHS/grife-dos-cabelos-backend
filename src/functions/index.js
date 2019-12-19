@@ -1,5 +1,9 @@
+require('dotenv').config()
+
 const path = require('path'),
-  fs = require('fs')
+  fs = require('fs'),
+  jwt = require('jsonwebtoken'),
+  bcryptjs = require('bcryptjs')
 
 exports.delFolder = (req, foldername, execption = false) => {
   return new Promise((resolve, reject) => {
@@ -17,7 +21,6 @@ exports.delFolder = (req, foldername, execption = false) => {
 
         fs.rmdirSync(dir)
       }
-
       resolve()
     } catch(err) {
       reject()
@@ -31,4 +34,70 @@ exports.middleware = (...steps) => {
   }
 
   stepByStep(0)
+}
+
+exports.token = _id => {
+  return new Promise((resolve, reject) => {
+    try {
+      const exp = Math.floor(Date.now() / 1000) + (60 * 120)
+
+      jwt.sign({ _id, exp }, process.env.WORD_SECRET, (err, token) => {
+        if (err)
+          return reject()
+  
+        resolve(token)
+      })
+    } catch(e) {
+      reject()
+    }
+  })
+}
+
+exports.verifyToken = token => {
+  return new Promise((resolve, reject) => {
+    try {
+      jwt.verify(token, process.env.WORD_SECRET, (err, decoded) => {
+        if (err)
+          return reject()
+
+        resolve(decoded)
+      })
+    } catch(e) {
+      reject()
+    }
+  })
+}
+
+exports.authenticate_user = (req, res, next) => {
+  try {
+
+    const { authorization } = req.headers
+
+    if (authorization.split(' ').length !== 2)
+      throw 'Token mal formatado'
+
+    const [ Bearer, hash ] = authorization.split(' ')
+
+    if (!/^Bearer$/.test(Bearer))
+      throw 'Token não é desta aplicação'
+
+    this.verifyToken(hash)  
+      .then(decoded => {
+        req._id = decoded._id
+
+        next()
+      })
+      .catch(() => {
+        res.status(404).send()
+      })
+
+  } catch(e) {
+    res.status(404).send(e)
+  }
+}
+
+exports.criptor = password => {
+  const salt = bcryptjs.genSaltSync(10)
+
+  return bcryptjs.hashSync(password, salt)
 }

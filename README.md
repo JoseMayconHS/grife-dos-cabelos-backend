@@ -19,7 +19,7 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/both/product/:page` : busca todos os produtos;
 	- `/admin/dashboard/user/:page` : busca todos os usuários.
 - PUT
-	- `/app/user/:id` : Atualiza um usuário;
+	- `/private/app/user` : Atualiza um usuário;
 	- `/admin/dashboard/product/:id` : Atualiza um produto;	
 	- `/admin/dashboard/brand/:_id` : Atualiza uma marca.
 - DELETE

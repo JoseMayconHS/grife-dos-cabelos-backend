@@ -1,4 +1,5 @@
 const bcryptjs = require('bcryptjs'),
+  functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
   limit = 2  
 
@@ -11,7 +12,7 @@ exports.indexAll = (req, res) => {
       } else {
         const { page } = req.params
 
-        User.find({}, 'name cellphone')
+        User.find({})
           .limit(limit)
           .skip((limit * page) - limit)
           .sort('-createdAt')
@@ -42,9 +43,7 @@ exports.store = (req, res) => {
         if (!Documents) {
           try {
 
-            const salt = bcryptjs.genSaltSync(10)
-
-            password = bcryptjs.hashSync(password, salt)
+            password = functions.criptor(password)
 
             User.create({ username, cellphone, password })
               .then(user => {
@@ -73,7 +72,42 @@ exports.store = (req, res) => {
 }
 
 exports.update = (req, res) => {
-  res.send('ok')
+  try {
+
+    User.findById(req._id)
+      .then(user => {
+        try {
+
+          if (req.body.username) {
+            if (req.body.username === user._doc.username)
+              throw 'O nome é o mesmo'
+          }
+
+          if (req.body.cellphone) {
+            if (req.body.cellphone === user._doc.cellphone)
+              throw 'O número de telefone é o mesmo'
+          }
+
+          if (req.body.password) {
+            req.body.password = functions.criptor(req.body.password)
+          }
+
+          User.updateOne({ _id: req._id }, req.body)
+            .then(ress => {
+              res.status(204).json({ ress })
+            })
+            .catch(() => {
+              res.status(400).send()
+            })
+
+        } catch(message) {
+          res.status(200).json({ ok: false, message })
+        }
+      })    
+
+  } catch(e) {
+    res.status(500).send()
+  }
 }
 
 exports.sign = (req, res) => {
@@ -91,7 +125,13 @@ exports.sign = (req, res) => {
             if (!bcryptjs.compareSync(password, user._doc.password)) {
               throw 'Senha inválida'
             } else {
-              res.status(200).json({ ok: true, data: user._doc })
+              functions.token(user._doc._id)
+                .then(token => {
+                  res.status(200).json({ ok: true, data: user._doc, token: `Bearer ${token}` })
+                })
+                .catch(() => {
+                  res.status(500).send()
+                })              
             }
 
           }
