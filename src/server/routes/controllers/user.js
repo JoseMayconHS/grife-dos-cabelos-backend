@@ -38,24 +38,36 @@ exports.store = (req, res) => {
     let { password } = req.body
 
     User.findOne({ username })
-      .then(Documents => {
+      .then(userByUsername => {
 
-        if (!Documents) {
-          try {
+        if (!userByUsername) {
 
-            password = functions.criptor(password)
+          User.findOne({ cellphone })
+            .then(userByCellphone => {
 
-            User.create({ username, cellphone, password })
-              .then(user => {
-                res.status(201).json({ ok: true, data: user._doc })
-              })
-              .catch(_ => {
-                res.status(200).json({ ok: false, message: 'Não criado' })
-              })
+              if (!userByCellphone) {
 
-          } catch(error) {
-            res.status(500).send()
-          }
+                try {
+
+                  password = functions.criptor(password.toLowerCase())
+      
+                  User.create({ username, cellphone, password })
+                    .then(user => {
+                      res.status(201).json({ ok: true, data: user._doc })
+                    })
+                    .catch(_ => {
+                      res.status(200).json({ ok: false, message: 'Não criado' })
+                    })
+      
+                } catch(error) {
+                  res.status(500).send()
+                }
+
+              } else {
+                res.status(200).json({ ok: false, message: 'Telefone já cadastrado' })
+              }
+
+            })
           
         } else {
           res.status(200).json({ ok: false, message: 'Nome já existe' })
@@ -93,11 +105,11 @@ exports.update = (req, res) => {
           }
 
           User.updateOne({ _id: req._id }, req.body)
-            .then(ress => {
-              res.status(204).json({ ress })
+            .then(_ => {
+              res.status(200).json({ ok: true, message: 'Alterado com sucesso' })
             })
-            .catch(() => {
-              res.status(400).send()
+            .catch(_ => {
+              res.status(200).json({ ok: false, message: 'Nome já existe' })
             })
 
         } catch(message) {
@@ -115,19 +127,19 @@ exports.sign = (req, res) => {
 
     const { username, password } = req.body
 
-    User.findOne({ username })
+    User.findOne({ username: username.trim() })
       .then(user => {
         try {
           if (!user) {
            throw 'Usuário não existe'
           } else {
 
-            if (!bcryptjs.compareSync(password, user._doc.password)) {
+            if (!bcryptjs.compareSync(password.toLowerCase(), user._doc.password)) {
               throw 'Senha inválida'
             } else {
               functions.token(user._doc._id)
                 .then(token => {
-                  res.status(200).json({ ok: true, data: user._doc, token: `Bearer ${token}` })
+                  res.status(200).json({ ok: true, data: { ...user._doc, password: undefined }, token: `Bearer ${token}` })
                 })
                 .catch(() => {
                   res.status(500).send()

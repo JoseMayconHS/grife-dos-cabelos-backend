@@ -2,7 +2,7 @@ const path = require('path'),
 	Product = require('../../../data/Schemas/Product'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 2	
+	limit = 10
 
 exports.indexAll = (req, res) => {
 	try {
@@ -135,20 +135,33 @@ exports.update = (req, res) => {
 
 exports.indexBy = (req, res) => {
 	try {
-		const where = req.query
+		let where = req.query
 
 		const { page } = req.params
 
-		Product.find(where)
-			.limit(limit)
-			.skip((limit * page) - limit)
-			.sort('-createdAt')
-			.then(Documents => {
-				res.status(200).json({ ok: true, data: Documents, limit })
-			})
-			.catch(_ => {
-				res.status(500).send()
-			})			
+		if (where.type === 'combo') {
+			Product.find(where)
+				.then(Documents => [
+					res.status(200).json({ ok: true, data: Documents })
+				])
+				.catch(_ => {
+					res.status(500).send()
+				})
+		} else {
+			if (where.brand_id) where = { ...where, type: { $ne: 'combo' } }
+
+			Product.find(where)
+				.limit(limit)
+				.skip((limit * page) - limit)
+				.sort('-createdAt')
+				.then(Documents => {
+					res.status(200).json({ ok: true, data: Documents, limit })
+				})
+				.catch(_ => {
+					res.status(500).send()
+				})
+		}
+			
 	} catch(error) {
 		res.status(500).send()
 	}
