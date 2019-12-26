@@ -12,11 +12,13 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/app/user/signup` : Cria um usuário;
 	- `/app/user/signin` : Realiza o login do usuário;
 	- `/admin/dashboard/brand` : Cria uma marca;
+	- `/admin/dashboard/expo` : Regista o dispositivo no bando de dados;
+	- `/admin/dashboard/expo/send` : Manda notificação à todos os dispositivos conectados ao app;
 	- `/admin/dashboard/product` : Cria um produto.
 - GET
-	- `/both/brand/:page` : Busca marcas;
-	-	`/both/product/by/:page` : realiza um filtro nos produtos;
-	- `/both/product/:page` : busca todos os produtos;
+	- `/private/both/brand/:page` : Busca marcas;	
+	- `/private/both/product/:page` : busca todos os produtos;
+	-	`/private/both/product/by/:page` : realiza um filtro nos produtos;
 	- `/admin/dashboard/user/:page` : busca todos os usuários.
 - PUT
 	- `/private/app/user` : Atualiza um usuário;
