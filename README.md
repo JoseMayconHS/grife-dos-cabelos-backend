@@ -12,8 +12,8 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/app/user/signup` : Cria um usuário;
 	- `/app/user/signin` : Realiza o login do usuário;
 	- `/admin/dashboard/brand` : Cria uma marca;
-	- `/admin/dashboard/expo` : Regista o dispositivo no bando de dados;
-	- `/admin/dashboard/expo/send` : Manda notificação à todos os dispositivos conectados ao app;
+	- `/app/device/expo` : Regista o dispositivo no bando de dados;
+	- `/app/device/expo/send` : Manda notificação à todos os dispositivos conectados ao app;
 	- `/admin/dashboard/product` : Cria um produto.
 - GET
 	- `/private/both/brand/:page` : Busca marcas;	
