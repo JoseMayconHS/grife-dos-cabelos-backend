@@ -88,11 +88,11 @@ exports.authenticate_user = (req, res, next) => {
         next()
       })
       .catch(() => {
-        res.status(404).send()
+        res.status(401).send()
       })
 
   } catch(e) {
-    res.status(404).send(e)
+    res.status(401).send(e)
   }
 }
 
