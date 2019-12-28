@@ -8,5 +8,6 @@ route
 	.get('/private/both/product/:page', productControllers.indexAll)
 	.get('/private/both/product/by/:page', productControllers.indexBy)
 	.get('/admin/dashboard/user/:page', userControllers.indexAll)
+	.get('/private/both/product/search/:word/:page', productControllers.search)
 
 module.exports = app => app.use(route)

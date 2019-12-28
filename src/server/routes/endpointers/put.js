@@ -4,7 +4,7 @@ const route = require('express').Router(),
 	brandControllers = require('../controllers/brand')
 
 route
-	.put('/admin/dashboard/product/:id', productControllers.update)
+	.put('/admin/dashboard/product/:_id', productControllers.update)
 	.put('/private/app/user', userControllers.update)
 	.put('/admin/dashboard/brand/:_id', brandControllers.update)
 

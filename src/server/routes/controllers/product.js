@@ -11,7 +11,7 @@ exports.indexAll = (req, res) => {
 			if (err) {
 				res.status(500).send()
 			} else {
-				const { page } = req.params
+				const { page = 1 } = req.params
 
 				Product.find()
 					.limit(limit)
@@ -111,7 +111,7 @@ exports.store = (req, res) => {
 
 exports.update = (req, res) => {
 	try {
-		const { id: _id } = req.params,
+		const { _id } = req.params,
 			document = req.body
 
 		Product.updateOne({ _id }, document)
@@ -137,7 +137,7 @@ exports.indexBy = (req, res) => {
 	try {
 		let where = req.query
 
-		const { page } = req.params
+		const { page = 1 } = req.params
 
 		if (where.type === 'combo') {
 			Product.find(where)
@@ -191,5 +191,25 @@ exports.remove = (req, res) => {
 			
 	} catch(e) {
 		res.status(500).send()
+	}
+}
+
+exports.search = (req, res) => {
+	try {
+
+		const { word, page = 1 } = req.params
+
+		const condition = new RegExp(word.trim(), 'gi')
+
+		Product.find()
+			.limit(limit)
+			.skip((limit * page) - limit)
+			.sort('-createdAt')
+			.then(all => all.filter(({ title, type, brand }) => title.search(condition) >= 0 || brand.search(condition) >= 0 || type.search(condition) >= 0))
+			.then(filtered => res.status(200).json({ ok: true, data: filtered }))
+			.catch(err => res.status(200).json({ ok: false, err }))
+
+	} catch(err) {
+		res.status(500).json(err)
 	}
 }
