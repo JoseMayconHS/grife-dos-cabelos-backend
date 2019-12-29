@@ -99,5 +99,5 @@ exports.authenticate_user = (req, res, next) => {
 exports.criptor = password => {
   const salt = bcryptjs.genSaltSync(10)
 
-  return bcryptjs.hashSync(password, salt)
+  return bcryptjs.hashSync(password.toLowerCase(), salt)
 }

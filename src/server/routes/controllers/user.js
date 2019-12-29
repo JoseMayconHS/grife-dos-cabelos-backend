@@ -49,7 +49,7 @@ exports.store = (req, res) => {
 
                 try {
 
-                  password = functions.criptor(password.toLowerCase())
+                  password = functions.criptor(password)
       
                   User.create({ username, cellphone, password })
                     .then(user => {
