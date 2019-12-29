@@ -2,7 +2,7 @@ const path = require('path'),
 	Product = require('../../../data/Schemas/Product'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 10
+	limit = 12
 
 exports.indexAll = (req, res) => {
 	try {
@@ -206,7 +206,7 @@ exports.search = (req, res) => {
 			.skip((limit * page) - limit)
 			.sort('-createdAt')
 			.then(all => all.filter(({ title, type, brand }) => title.search(condition) >= 0 || brand.search(condition) >= 0 || type.search(condition) >= 0))
-			.then(filtered => res.status(200).json({ ok: true, data: filtered }))
+			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
 			.catch(err => res.status(200).json({ ok: false, err }))
 
 	} catch(err) {

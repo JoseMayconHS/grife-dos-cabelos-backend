@@ -2,7 +2,7 @@ const path = require('path'),
   Brand = require('../../../data/Schemas/Brand'),
   Product = require('../../../data/Schemas/Product'),
   functions =  require('../../../functions'),
-  limit = 2
+  limit = 12
 
 exports.indexAll = (req, res) => {
   try {

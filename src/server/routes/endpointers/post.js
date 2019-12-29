@@ -13,8 +13,8 @@ const route = require('express').Router(),
 route
 	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
 	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
-	.post('/app/device/expo', pushNotificationControllers.store)
-	.post('/app/device/expo/send', pushNotificationControllers.send)
+	.post('/admin/dashboard/expo', pushNotificationControllers.send)
+	.post('/app/expo', pushNotificationControllers.store)
 	.post('/app/user/signup', userControllers.store)
 	.post('/app/user/signin', userControllers.sign)
 

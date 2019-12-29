@@ -11,8 +11,8 @@ API para auxiliar no desenvolvimento do aplicativo.
 - POST
 	- `/app/user/signup` : Cria um usuário;
 	- `/app/user/signin` : Realiza o login do usuário;
-	- `/app/device/expo` : Regista o dispositivo no bando de dados;
-	- `/app/device/expo/send` : Manda notificação à todos os dispositivos conectados ao app;
+	- `/app/expo` : Regista o dispositivo no bando de dados;
+	- `/admin/dashboard/expo` : Manda notificação à todos os dispositivos conectados ao app;
 	- `/admin/dashboard/brand` : Cria uma marca;
 	- `/admin/dashboard/product` : Cria um produto.
 - GET

@@ -1,7 +1,7 @@
 const bcryptjs = require('bcryptjs'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
-  limit = 2  
+  limit = 12
 
 exports.indexAll = (req, res) => {
   try {
