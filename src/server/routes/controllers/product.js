@@ -155,7 +155,7 @@ exports.indexBy = (req, res) => {
 				.skip((limit * page) - limit)
 				.sort('-createdAt')
 				.then(Documents => {
-					res.status(200).json({ ok: true, data: Documents, limit })
+					res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit })
 				})
 				.catch(_ => {
 					res.status(500).send()
