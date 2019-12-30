@@ -8,7 +8,13 @@ exports.send = (req, res) => {
     const { title, body } = req.body
 
     if (!title || !body) 
-      throw new Error()    
+      throw new Error()
+
+    if (typeof title !== 'string' || typeof body !== 'string')
+      throw new Error()
+
+    if (!title.length || !body.length)
+      throw new Error()
 
     ExpoModel.find({}, 'token')
       .then(async tokens => {
@@ -22,7 +28,7 @@ exports.send = (req, res) => {
             messagens.push({
               to: token,
               sound: 'default',
-              body, title
+              title, body
             })
           }
 
