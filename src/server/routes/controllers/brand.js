@@ -37,11 +37,11 @@ exports.store = (req, res) => {
       thumbnail = path.parse(req.file.originalname).name
 
     const _document = {
-      title,
+      title: title.trim(),
       thumbnail
     }
     
-    Brand.findOne({ title })
+    Brand.findOne({ title: title.trim() })
       .then(already => {
         if (already) {
           return res.json({ ok: false, message: 'Marca já existe' })

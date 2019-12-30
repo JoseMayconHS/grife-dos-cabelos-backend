@@ -37,7 +37,7 @@ exports.store = (req, res) => {
 
     let { password } = req.body
 
-    User.findOne({ username })
+    User.findOne({ username: username.trim() })
       .then(userByUsername => {
 
         if (!userByUsername) {
@@ -51,7 +51,7 @@ exports.store = (req, res) => {
 
                   password = functions.criptor(password)
       
-                  User.create({ username, cellphone, password })
+                  User.create({ username: username.trim(), cellphone, password })
                     .then(user => {
                       res.status(201).json({ ok: true, data: user._doc })
                     })
@@ -134,7 +134,7 @@ exports.sign = (req, res) => {
            throw 'Usuário não existe'
           } else {
 
-            if (!bcryptjs.compareSync(password.toLowerCase(), user._doc.password)) {
+            if (!bcryptjs.compareSync(password.trim().toLowerCase(), user._doc.password)) {
               throw 'Senha inválida'
             } else {
               functions.token(user._doc._id)

@@ -13,7 +13,7 @@ exports.indexAll = (req, res) => {
 			} else {
 				const { page = 1 } = req.params
 
-				Product.find()
+				Product.find({ type: { $ne: 'combo' } })
 					.limit(limit)
 					.skip((limit * page) - limit)
 					.sort('-createdAt')
@@ -49,7 +49,7 @@ exports.store = (req, res) => {
 			.then(brand => {
 				if (brand) {
 					const _document = {
-						title,
+						title: title.trim(),
 						item_included, 
 						description: description.trim(),
 						brand: brand.title,
@@ -201,7 +201,7 @@ exports.search = (req, res) => {
 
 		const condition = new RegExp(word.trim(), 'gi')
 
-		Product.find()
+		Product.find({ type: { $ne: 'combo' } })
 			.limit(limit)
 			.skip((limit * page) - limit)
 			.sort('-createdAt')
