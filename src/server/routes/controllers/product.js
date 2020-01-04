@@ -1,53 +1,11 @@
 const path = require('path'),
-	pdf = require('pdf-creator-node'),
-	fs = require('fs')
 	Product = require('../../../data/Schemas/Product'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
 	pdfTemplates =  require('../../../data/pdf')
 	limit = 12
 
-exports.buy = (req, res)	 => {
 
-	console.log(req.body)
-	const html = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'data', 'pdf', 'template.html'), { encoding: 'utf8' })
-
-	const options = {
-		format: "A4",
-		orientation: "portrait",
-		border: "10mm",
-		header: {
-			height: "28mm",
-			contents: pdfTemplates.header
-		},
-		footer: {
-			height: "5mm",
-			contents: {
-				first: '',
-				2: 'Second page', // Any page number is working. 1-based index
-				default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-				last: 'Capiba Comunicação'
-			}
-		}
-	}
-
-	const document = {
-		html,
-		data: req.body,
-		path: "./src/data/pdf/files/output.pdf"
-	}
-
-	pdf.create(document, options)
-    .then(result => {
-				console.log(result)
-				res.status(201).sendFile(result.filename)
-    })
-    .catch(error => {
-				console.error(error)
-				res.status(201).json({ ok: false, message: 'Arquivo não criado' })
-    })
-
-}
 
 exports.indexAll = (req, res) => {
 	try {
