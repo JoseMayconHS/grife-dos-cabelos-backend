@@ -1,48 +1,23 @@
 const bcryptjs = require('bcryptjs'),
-  pdf = require('pdf-creator-node'),
-	fs = require('fs')
+  pdf = require('html-pdf'),
+  pdfTemplates = require('../../../data/pdf'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
   limit = 12
 
-exports.buy = (req, res)	 => {
+exports.buy = (req, res) => {
 
-  console.log(req.body)
-  const html = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'data', 'pdf', 'template.html'), { encoding: 'utf8' })
+  // const html = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'data', 'pdf', 'template.html'), { encoding: 'utf8' })
+  const html = pdfTemplates.template(req.body)
 
-  const options = {
-    format: "A4",
-    orientation: "portrait",
-    border: "10mm",
-    header: {
-      height: "28mm",
-      contents: pdfTemplates.header
-    },
-    footer: {
-      height: "5mm",
-      contents: {
-        first: '',
-        2: 'Second page', // Any page number is working. 1-based index
-        default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-        last: 'Capiba Comunicação'
-      }
-    }
-  }
+  pdf.create(html, { directory: './', format: 'A4', orientation: 'landscape' })
+    .toFile('output.pdf', (err, fileInfo) => {
+      if (err) 
+        return console.log(err)
 
-  const document = {
-    html,
-    data: req.body,
-    path: "./src/data/pdf/files/output.pdf"
-  }
+      console.log(fileInfo)  
 
-  pdf.create(document, options)
-    .then(result => {
-        console.log(result)
-        res.status(201).sendFile(result.filename)
-    })
-    .catch(error => {
-        console.error(error)
-        res.status(201).json({ ok: false, message: 'Arquivo não criado' })
+        res.status(200).sendFile(fileInfo.filename)
     })
 
 }  

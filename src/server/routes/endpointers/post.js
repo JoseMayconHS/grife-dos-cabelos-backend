@@ -17,6 +17,6 @@ route
 	.post('/app/expo', pushNotificationControllers.store)
 	.post('/app/user/signup', userControllers.store)
 	.post('/app/user/signin', userControllers.sign)
-	.post('/app/user/buy', userControllers.buy)
+	// .post('/app/user/buy', userControllers.buy)
 
 module.exports = app => app.use(route)
