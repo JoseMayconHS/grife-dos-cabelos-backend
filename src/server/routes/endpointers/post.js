@@ -11,12 +11,15 @@ const route = require('express').Router(),
 	upBrand = multer({ storage: brand, fileFilter })
 	
 route
-	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
-	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
-	.post('/admin/dashboard/expo', pushNotificationControllers.send)
+	// App
 	.post('/app/expo', pushNotificationControllers.store)
 	.post('/app/user/signup', userControllers.store)
 	.post('/app/user/signin', userControllers.sign)
+	// Dashboard
+	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
+	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
+	.post('/admin/dashboard/expo', pushNotificationControllers.send)
+	
 	// .post('/app/user/buy', userControllers.buy)
 
 module.exports = app => app.use(route)

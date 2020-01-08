@@ -20,7 +20,23 @@ exports.buy = (req, res) => {
         res.status(200).sendFile(fileInfo.filename)
     })
 
-}  
+} 
+
+exports.qtd = (req, res) => {
+  try {
+
+      User.countDocuments((err, count) => {
+        if (err) {
+          res.status(500).send(err)
+        } else {
+          res.status(200).json({ count })
+        }
+      })
+    
+  } catch(err) {
+    res.status(500).send(err)
+  }
+}
 
 exports.indexAll = (req, res) => {
   try {
@@ -196,4 +212,24 @@ exports.remove = (req, res) => {
   } catch(e) {
     res.status(500).send()
   }
+}
+
+exports.search = (req, res) => {
+	try {
+
+		const { word, page = 1 } = req.params
+
+		const condition = new RegExp(word.trim(), 'gi')
+
+		User.find()
+			.limit(limit)
+			.skip((limit * page) - limit)
+			.sort('-createdAt')
+			.then(all => all.filter(({ username }) => username.search(condition) >= 0))
+			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
+			.catch(err => res.status(400).send(err))
+
+	} catch(err) {
+		res.status(500).json(err)
+	}
 }

@@ -31,6 +31,53 @@ exports.indexAll = (req, res) => {
   }
 }
 
+exports.qtd = (req, res) => {
+  try {
+
+      Brand.countDocuments((err, count) => {
+        if (err) {
+          res.status(500).send(err)
+        } else {
+          res.status(200).json({ count })
+        }
+      })
+    
+  } catch(err) {
+    res.status(500).send(err)
+  }
+}
+
+exports.indexBy = (req, res) => {
+	try {
+    let where = req.query || {}
+    
+    const { page = 1 } = req.params
+    
+    Brand.count(where, (err, count) => {
+      if (err) {
+        res.status(500).send
+      } else {
+
+        Brand.find(where)
+          .limit(limit)
+          .skip((limit * page) - limit)
+          .sort('-createdAt')
+          .then(Documents => {
+            res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit, count })
+          })
+          .catch(_ => {
+            res.status(500).send()
+          })
+
+      }
+    })
+			
+	} catch(error) {
+		res.status(500).send()
+	}
+
+}
+
 exports.store = (req, res) => {
   try {
     const { title } = req.body,
@@ -165,4 +212,24 @@ exports.update = (req, res) => {
   } catch(e) {
     res.status(500).send()
   }
+}
+
+exports.search = (req, res) => {
+	try {
+
+		const { word, page = 1 } = req.params
+
+		const condition = new RegExp(word.trim(), 'gi')
+
+		Brand.find()
+			.limit(limit)
+			.skip((limit * page) - limit)
+			.sort('-createdAt')
+			.then(all => all.filter(({ title }) => title.search(condition) >= 0 ))
+			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
+			.catch(err => res.status(400).send(err))
+
+	} catch(err) {
+		res.status(500).json(err)
+	}
 }

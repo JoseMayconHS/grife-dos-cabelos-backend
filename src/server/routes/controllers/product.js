@@ -2,9 +2,7 @@ const path = require('path'),
 	Product = require('../../../data/Schemas/Product'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	pdfTemplates =  require('../../../data/pdf')
 	limit = 12
-
 
 
 exports.indexAll = (req, res) => {
@@ -32,6 +30,22 @@ exports.indexAll = (req, res) => {
 	} catch(error) {
 		res.status(500).send()
 	}
+}
+
+exports.qtd = (req, res) => {
+  try {
+
+      Product.countDocuments((err, count) => {
+        if (err) {
+          res.status(500).send(err)
+        } else {
+          res.status(200).json({ count })
+        }
+      })
+    
+  } catch(err) {
+    res.status(500).send(err)
+  }
 }
 
 exports.store = (req, res) => {
@@ -138,33 +152,30 @@ exports.update = (req, res) => {
 
 exports.indexBy = (req, res) => {
 	try {
-		let where = req.query
+		let where = req.query || {}
+
+		if (where.promotion) where.promotion = +where.promotion > 0 ? true : false
+
+		if (where.brand_id) where = { ...where, type: { $ne: 'combo' } }
 
 		const { page = 1 } = req.params
 
-		if (where.type === 'combo') {
-			Product.find(where)
-				.then(Documents => [
-					res.status(200).json({ ok: true, data: Documents })
-				])
-				.catch(_ => {
-					res.status(500).send()
-				})
-		} else {
-			if (where.brand_id) where = { ...where, type: { $ne: 'combo' } }
-
-			Product.find(where)
-				.limit(limit)
-				.skip((limit * page) - limit)
-				.sort('-createdAt')
-				.then(Documents => {
-					res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit })
-				})
-				.catch(_ => {
-					res.status(500).send()
-				})
-		}
-			
+		Product.count(where, (err, count) => {
+			if (err) {
+				res.status(500).send()
+			} else {
+				Product.find(where)
+					.limit(limit)
+					.skip((limit * page) - limit)
+					.sort('-createdAt')
+					.then(Documents => {
+						res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit, count })
+					})
+					.catch(_ => {
+						res.status(500).send()
+					})
+			}
+		})			
 	} catch(error) {
 		res.status(500).send()
 	}
@@ -210,7 +221,7 @@ exports.search = (req, res) => {
 			.sort('-createdAt')
 			.then(all => all.filter(({ title, type, brand }) => title.search(condition) >= 0 || brand.search(condition) >= 0 || type.search(condition) >= 0))
 			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
-			.catch(err => res.status(200).json({ ok: false, err }))
+			.catch(err => res.status(400).send(err))
 
 	} catch(err) {
 		res.status(500).json(err)

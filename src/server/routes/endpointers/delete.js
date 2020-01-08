@@ -4,6 +4,7 @@ const route = require('express').Router(),
   brandControllers = require('../controllers/brand')
 
 route
+  // Dashboard
   .delete('/admin/dashboard/brand/:_id', brandControllers.remove)
   .delete('/admin/dashboard/product/:_id', productControllers.remove)
   .delete('/admin/dashboard/user/:_id', userControllers.remove)

@@ -2,6 +2,22 @@ const { Expo } = require('expo-server-sdk'),
   ExpoModel = require('../../../data/Schemas/Expo'),
   expo = new Expo()
 
+exports.qtd = (req, res) => {
+  try {
+
+      ExpoModel.countDocuments((err, count) => {
+        if (err) {
+          res.status(500).send(err)
+        } else {
+          res.status(200).json({ count })
+        }
+      })
+    
+  } catch(err) {
+    res.status(500).send(err)
+  }
+}
+
 exports.send = (req, res) => {
   try {
 
