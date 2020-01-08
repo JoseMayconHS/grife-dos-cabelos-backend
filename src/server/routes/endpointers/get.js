@@ -14,6 +14,7 @@ route
 	.get('/private/both/product/:page', productControllers.indexAll)
 	.get('/private/both/product/by/:page', productControllers.indexBy)
 	.get('/private/both/product/search/:word/:page', productControllers.search)
+	.get('/private/app/swiper', productControllers.swiper)
 	// --- Dashboard ---
 	// Usuário
 	.get('/admin/dashboard/user/:page', userControllers.indexAll)	

@@ -32,6 +32,22 @@ exports.indexAll = (req, res) => {
 	}
 }
 
+exports.swiper = (req, res) => {
+	try {
+
+		Product.find({ type: 'combo' })
+			.then(Documents => {
+				res.status(200).json({ ok: true, data: Documents })
+			})
+			.catch(err => {
+				res.status(500).json({ ok: false })
+			})
+
+	} catch(err) {
+		res.status(500).send(err)
+	}
+}
+
 exports.qtd = (req, res) => {
   try {
 

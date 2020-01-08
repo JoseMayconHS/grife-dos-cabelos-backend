@@ -16,6 +16,7 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/admin/dashboard/brand` : Cria uma marca;
 	- `/admin/dashboard/product` : Cria um produto.
 - GET
+	- `/private/app/swiper` : Retorna produtos para o Swiper Component do App;
 	- `/private/both/brand/:page` : Busca marcas;	
 	- `/private/both/product/:page` : Busca todos os produtos;
 	-	`/private/both/product/by/:page` : Realiza um filtro nos produtos;
