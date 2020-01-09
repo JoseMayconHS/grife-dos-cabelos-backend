@@ -1,5 +1,6 @@
 const route = require('express').Router(),
 	multer = require('multer'),
+	admControllers = require('../controllers/adm'),
 	productControllers = require('../controllers/product'),
 	userControllers = require('../controllers/user'),
 	brandControllers = require('../controllers/brand'),
@@ -16,6 +17,8 @@ route
 	.post('/app/user/signup', userControllers.store)
 	.post('/app/user/signin', userControllers.sign)
 	// Dashboard
+	.post('/dashboard/signin', admControllers.sign)
+	.post('/dashboard/signup', admControllers.store)
 	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
 	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
 	.post('/admin/dashboard/expo', pushNotificationControllers.send)

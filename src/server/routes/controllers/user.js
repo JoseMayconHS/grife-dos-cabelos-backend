@@ -167,21 +167,20 @@ exports.sign = (req, res) => {
         try {
           if (!user) {
            throw 'Usuário não existe'
-          } else {
+          } 
 
-            if (!bcryptjs.compareSync(password.trim().toLowerCase(), user._doc.password)) {
-              throw 'Senha inválida'
-            } else {
-              functions.token(user._doc._id)
-                .then(token => {
-                  res.status(200).json({ ok: true, data: { ...user._doc, password: undefined }, token: `Bearer ${token}` })
-                })
-                .catch(() => {
-                  res.status(500).send()
-                })              
-            }
-
+          if (!bcryptjs.compareSync(password.trim().toLowerCase(), user._doc.password)) {
+            throw 'Senha inválida'
           }
+
+          functions.token(user._doc._id)
+            .then(token => {
+              res.status(200).json({ ok: true, data: { ...user._doc, password: undefined }, token: `Bearer ${token}` })
+            })
+            .catch(() => {
+              res.status(200).json({ ok: false, message: 'Erro ao gerar token' })
+            })              
+                    
         } catch(message) {
           res.status(200).json({ ok: false, message })
         }
