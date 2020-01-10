@@ -128,3 +128,28 @@ exports.sign = (req, res) => {
   }
 }
 
+exports.reconnect = (req, res) => {
+  try {
+
+    if (!req._id)
+      throw new Error()
+
+    Adm.findById(req._id)  
+      .then(adm => {
+        functions.token(adm._doc)
+          .then(token => {
+            res.status(200).json({ ok: true, data: { ...adm._doc, password: undefined, token: `Bearer ${token}` } })
+          })
+          .catch(() => {
+            res.status(200).json({ ok: false, message: 'Erro ao gerar token 💥' })
+          })
+      })
+      .catch(() => {
+        res.status(500).send()    
+      })
+
+  } catch(err) {
+    res.status(500).send(err)
+  }
+}
+
