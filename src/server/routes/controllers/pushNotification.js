@@ -1,5 +1,6 @@
 const { Expo } = require('expo-server-sdk'),
   ExpoModel = require('../../../data/Schemas/Expo'),
+  Adm = require('../../../data/Schemas/Adm'),
   expo = new Expo()
 
 exports.qtd = (req, res) => {
@@ -21,7 +22,7 @@ exports.qtd = (req, res) => {
 exports.send = (req, res) => {
   try {
 
-    const { title, body } = req.body
+    const { title, body, date } = req.body
 
     if (!title || !body) 
       throw new Error()
@@ -43,11 +44,44 @@ exports.send = (req, res) => {
           if (Expo.isExpoPushToken(token)) {
             messagens.push({
               to: token,
+              priority: 'high',
               sound: 'default',
               title, body
             })
           }
 
+        }
+
+        const addInAdmData = (success, send) => {
+          Adm.findById(req._id)
+          .then(adm => {
+            try {
+
+              let newArray = [ ...adm.notifications]
+
+              newArray.unshift({
+                success,
+                title, body,
+                date
+              })
+
+              if (newArray.length >= 10) {
+                newArray = newArray.splice(0, 10)
+              }
+
+              
+
+              adm.notifications = newArray
+
+              Adm.updateOne({ _id: req._id }, adm, () => send())
+
+            } catch(e) {
+              send()
+            }
+          })
+          .catch(() => {
+            send()
+          })
         }
 
         const chunks = expo.chunkPushNotifications(messagens)
@@ -56,11 +90,11 @@ exports.send = (req, res) => {
           try {
             await expo.sendPushNotificationsAsync(chunk)
           } catch(e) {
-
+            return addInAdmData(false, () => res.status(500).send())
           }
         }
 
-        res.status(200).send()
+        return addInAdmData(true, () => res.status(200).send())
     
       })
       .catch(() => {
@@ -93,3 +127,31 @@ exports.store = (req, res) => {
     res.status(500).send()
   }
 }
+
+exports.recents = (req, res) => {
+  try {
+
+    Adm.findById(req._id, 'notifications')
+      .then(adm => {
+        try {
+          if (!adm) 
+            throw new Error()
+
+          if (!adm.notifications)
+            throw new Error()
+
+          res.status(200).json({ ok: true, data: adm.notifications })
+
+        } catch(e) {
+          res.status(200).json({ ok: false })
+        }
+      })
+      .catch(e => {
+        res.status(200).json({ ok: false })
+      })
+
+  } catch(e) {
+    res.status(200).json({ ok: false })
+  }
+}
+

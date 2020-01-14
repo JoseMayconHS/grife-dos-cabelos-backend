@@ -19,6 +19,15 @@ const Adm = new Schema({
     type: Boolean,
     required: true,
     default: true
+  },
+  notifications: {
+    type: [Object],
+    default: [{
+      date: 'Notificação de exemplo',
+      success: true,
+      title: 'Primeira notificação 😃',
+      body: 'Você erra 💯% dos chutes que não dá! ⚽'
+    }]
   }
 }, {
   timestamps: { updatedAt: 'updated_at', createdAt: 'created_at' }

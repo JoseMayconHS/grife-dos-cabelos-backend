@@ -96,6 +96,38 @@ exports.authenticate_user = (req, res, next) => {
   }
 }
 
+exports.authenticate_adm = (req, res, next) => {
+  try {
+
+    const { authorization } = req.headers
+
+    if (authorization.split(' ').length !== 2)
+      throw 'Token mal formatado'
+
+    const [ Bearer, hash ] = authorization.split(' ')
+
+    if (!/^Bearer$/.test(Bearer))
+      throw 'Token não é desta aplicação'
+
+    this.verifyToken(hash)  
+      .then(decoded => {
+        if (decoded._id.adm) {
+          req._id = decoded._id.value
+
+          return next()
+        }
+        
+        res.status(401).send()
+      })
+      .catch(() => {
+        res.status(401).send()
+      })
+
+  } catch(e) {
+    res.status(401).send(e)
+  }
+}
+
 exports.criptor = password => {
   const salt = bcryptjs.genSaltSync(10)
 

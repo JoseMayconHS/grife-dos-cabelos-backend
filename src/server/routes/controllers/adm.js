@@ -106,7 +106,7 @@ exports.sign = (req, res) => {
             throw 'Senha inválida 🙄'
           }
 
-          functions.token(adm._doc)
+          functions.token({ adm: adm._doc.adm, value: adm._doc._id })
             .then(token => {
               res.status(200).json({ ok: true, data: { ...adm._doc, password: undefined, token: `Bearer ${token}` } })
             })
@@ -136,7 +136,7 @@ exports.reconnect = (req, res) => {
 
     Adm.findById(req._id)  
       .then(adm => {
-        functions.token(adm._doc)
+        functions.token({ adm: adm._doc.adm, value: adm._doc._id })
           .then(token => {
             res.status(200).json({ ok: true, data: { ...adm._doc, password: undefined, token: `Bearer ${token}` } })
           })
@@ -152,4 +152,3 @@ exports.reconnect = (req, res) => {
     res.status(500).send(err)
   }
 }
-

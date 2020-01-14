@@ -24,5 +24,7 @@ route
 	.get('/admin/dashboard/qtd/product', productControllers.qtd)
 	.get('/admin/dashboard/qtd/brand', brandControllers.qtd)
 	.get('/admin/dashboard/qtd/expo', pushNotificationControllers.qtd)
+	//Notificações
+	.get('/admin/dashboard/notifications', pushNotificationControllers.recents)
 
 module.exports = app => app.use(route)

@@ -19,7 +19,7 @@ route
 	// Dashboard
 	.post('/dashboard/signin', admControllers.sign)
 	.post('/dashboard/signup', admControllers.store)
-	.post('/private/dashboard/reconnect', admControllers.reconnect)
+	.post('/admin/dashboard/reconnect', admControllers.reconnect)
 	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
 	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
 	.post('/admin/dashboard/expo', pushNotificationControllers.send)

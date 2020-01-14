@@ -14,7 +14,8 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/app/expo` : Regista o dispositivo no bando de dados;
 	- `/admin/dashboard/expo` : Manda notificação à todos os dispositivos conectados ao app;
 	- `/admin/dashboard/brand` : Cria uma marca;
-	- `/admin/dashboard/product` : Cria um produto.
+	- `/admin/dashboard/product` : Cria um produto;
+	- `/admin/dashboard/reconnect` : Reconecta à aplicação.
 - GET
 	- `/private/app/swiper` : Retorna produtos para o Swiper Component do App;
 	- `/private/both/brand/:page` : Busca marcas;	
