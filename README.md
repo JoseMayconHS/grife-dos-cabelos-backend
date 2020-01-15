@@ -35,3 +35,4 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/admin/dashboard/brand/:_id` : Delete uma marca;
 	- `/admin/dashboard/product/:_id` : Deleta um produto;
 	- `/admin/dashboard/user/:_id` : Deleta um cliente;
+	- `/admin/dashboard/notification/:index` : Deleta uma notificação das recentes.

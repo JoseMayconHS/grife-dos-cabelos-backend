@@ -39,9 +39,9 @@ exports.middleware = (...steps) => {
 exports.token = _id => {
   return new Promise((resolve, reject) => {
     try {
-      const exp = Math.floor(Date.now() / 1000) + (60 * 120)
+      const exp = Math.floor((Date.now() / 1000) + (60 * 60 * 24 * 7))
 
-      jwt.sign({ _id, exp }, process.env.WORD_SECRET, (err, token) => {
+      jwt.sign({ _id, exp }, process.env.WORD_SECRET || 'cpb', (err, token) => {
         if (err)
           return reject()
   

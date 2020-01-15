@@ -155,3 +155,38 @@ exports.recents = (req, res) => {
   }
 }
 
+exports.remove = (req, res) => {
+  try {
+
+    const { index: deleteIt } = req.params
+
+    Adm.findById(req._id, 'notifications')
+      .then(adm => {
+        try {
+
+          if (!adm) 
+            throw new Error()
+
+          if (!adm.notifications)
+            throw new Error()
+
+
+          const newNotifications  = adm.notifications.filter((item, index) => +index !== +deleteIt)
+
+          adm.notifications = [ ...newNotifications ]
+
+          Adm.updateOne({ _id: req._id }, adm, (err) => res.status(err ? 500 : 200).send())
+
+        } catch(e) {
+          res.status(500).send()
+        }
+      })
+      .catch(e => {
+        res.status(500).send()
+      })
+
+  } catch(e) {
+    res.status(500).send()
+  }
+}
+
