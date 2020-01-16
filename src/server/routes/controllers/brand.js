@@ -18,7 +18,7 @@ exports.indexAll = (req, res) => {
           .skip((limit * page) - limit)
           .sort('-createdAt')
           .then(Documents => {
-            res.status(200).json({ data: Documents, limit, count })
+            res.status(200).json({ ok: true, data: Documents, limit, count })
           })
           .catch(_ => {
             res.status(500).send()

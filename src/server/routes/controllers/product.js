@@ -2,13 +2,13 @@ const path = require('path'),
 	Product = require('../../../data/Schemas/Product'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 12
+	limit = 4
 
 
 exports.indexAll = (req, res) => {
 	try {
 
-		Product.countDocuments((err, count) => {
+		Product.count({ type: { $ne: 'combo' } }, (err, count) => {
 			if (err) {
 				res.status(500).send()
 			} else {

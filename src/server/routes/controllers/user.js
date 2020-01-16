@@ -47,12 +47,12 @@ exports.indexAll = (req, res) => {
       } else {
         const { page } = req.params
 
-        User.find({})
+        User.find()
           .limit(limit)
           .skip((limit * page) - limit)
           .sort('-createdAt')
           .then(Documents => {
-            res.status(200).json({ data: Documents, limit, count })
+            res.status(200).json({ ok: true, data: Documents, limit, count })
           })
           .catch(_ => {
             res.status(500).send()
