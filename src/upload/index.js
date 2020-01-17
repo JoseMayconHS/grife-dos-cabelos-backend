@@ -18,7 +18,7 @@ exports.storageProduct = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname)
 
-    cb(null, `thumbnail${ext}`)
+    cb(null, `thumbnail.jpg`)
   }
 })
 
@@ -45,6 +45,6 @@ exports.storageBrand = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname)
 
-    cb(null, `thumbnail${ext}`)
+    cb(null, `thumbnail.jpg`)
   }
 })

@@ -26,7 +26,7 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/private/both/brand/search/:word/:page` : Pesquisa por marcas;
 	- `/admin/dashboard/user/search/:word/:page` : Pesquisa por clientes;
 	- `/admin/dashboard/user/:page` : Busca todos os usuários;
-	- `/admin/dashboard/qtd/:collection` : Retorna a quantidade de de dedos da coleção.
+	- `/admin/dashboard/qtd/:collection` : Retorna a quantidade de dados da coleção.
 - PUT
 	- `/private/app/user` : Atualiza um usuário;
 	- `/admin/dashboard/product/:_id` : Atualiza um produto;	
