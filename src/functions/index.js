@@ -85,6 +85,8 @@ exports.authenticate_user = (req, res, next) => {
       .then(decoded => {
         req._id = decoded._id
 
+        if (decoded._id.adm) req.adm = true
+
         next()
       })
       .catch(() => {
@@ -113,6 +115,7 @@ exports.authenticate_adm = (req, res, next) => {
       .then(decoded => {
         if (decoded._id.adm) {
           req._id = decoded._id.value
+          req.adm = true
 
           return next()
         }

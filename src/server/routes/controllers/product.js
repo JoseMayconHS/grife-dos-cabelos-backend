@@ -8,13 +8,15 @@ const path = require('path'),
 exports.indexAll = (req, res) => {
 	try {
 
-		Product.count({ type: { $ne: 'combo' } }, (err, count) => {
+		const where = req.adm ? {} : { type: { $ne: 'combo' } }
+
+		Product.count(where, (err, count) => {
 			if (err) {
 				res.status(500).send()
 			} else {
 				const { page = 1 } = req.params
 
-				Product.find({ type: { $ne: 'combo' } })
+				Product.find(where)
 					.limit(limit)
 					.skip((limit * page) - limit)
 					.sort('-createdAt')
@@ -172,7 +174,7 @@ exports.indexBy = (req, res) => {
 
 		if (where.promotion) where.promotion = +where.promotion > 0 ? true : false
 
-		if (where.brand_id) where = { ...where, type: { $ne: 'combo' } }
+		if (where.brand_id && !req.adm) where = { ...where, type: { $ne: 'combo' } }
 
 		const { page = 1 } = req.params
 
@@ -206,7 +208,7 @@ exports.remove = (req, res) => {
 			.then(product => {
 				functions.delFolder(null, 'products', product.thumbnail)
 					.finally(() => {
-						Product.deleteOne({ _id } 	)
+						Product.deleteOne({ _id })
 							.then(_ => {
 								res.status(200).send('Excluido com sucesso')
 							})
