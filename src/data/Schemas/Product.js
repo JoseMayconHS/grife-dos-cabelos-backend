@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose')
 
-const validTypes = ['botox', 'progressiva', 'combo', 'manutenção', 'reconstrução', 'finalização', 'coloração']
+// const validTypes = ['botox', 'progressiva', 'combo', 'manutenção', 'reconstrução', 'finalização', 'coloração']
 
 const Product =  new Schema({
 	title: {
@@ -38,8 +38,12 @@ const Product =  new Schema({
 	},
 	type: {
 		type: String,
-		required: true,
-		validate: value => validTypes.includes(value)
+		required: true
+		// validate: value => validTypes.includes(value)
+	},
+	type_id: {
+		type: Schema.Types.ObjectId,
+		required: true
 	},
 	promotion: {
 		type: Boolean,

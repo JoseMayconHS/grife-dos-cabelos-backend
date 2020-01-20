@@ -4,6 +4,7 @@ const route = require('express').Router(),
 	productControllers = require('../controllers/product'),
 	userControllers = require('../controllers/user'),
 	brandControllers = require('../controllers/brand'),
+	typeControllers = require('../controllers/type'),
 	pushNotificationControllers = require('../controllers/pushNotification'),
 	product = require('../../../upload').storageProduct,
 	fileFilter = require('../../../upload').fileFilter,
@@ -22,6 +23,7 @@ route
 	.post('/admin/dashboard/reconnect', admControllers.reconnect)
 	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
 	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
+	.post('/admin/dashboard/type', typeControllers.store)
 	.post('/admin/dashboard/expo', pushNotificationControllers.send)
 	
 	// .post('/app/user/buy', userControllers.buy)

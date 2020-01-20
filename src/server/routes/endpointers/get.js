@@ -2,6 +2,7 @@ const route = require('express').Router(),
 	productControllers = require('../controllers/product')
 	userControllers = require('../controllers/user'),
 	brandControllers = require('../controllers/brand'),
+	typeControllers = require('../controllers/type'),
 	pushNotificationControllers = require('../controllers/pushNotification')
 
 route
@@ -15,6 +16,8 @@ route
 	.get('/private/both/product/by/:page', productControllers.indexBy)
 	.get('/private/both/product/search/:word/:page', productControllers.search)
 	.get('/private/app/swiper', productControllers.swiper)
+	// Tipos
+	.get('/private/both/type/:page', typeControllers.indexAll)
 	// --- Dashboard ---
 	// Usuário
 	.get('/admin/dashboard/user/:page', userControllers.indexAll)	

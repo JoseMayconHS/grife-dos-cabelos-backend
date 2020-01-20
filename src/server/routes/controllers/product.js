@@ -1,5 +1,6 @@
 const path = require('path'),
 	Product = require('../../../data/Schemas/Product'),
+	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
 	limit = 4
@@ -10,7 +11,7 @@ exports.indexAll = (req, res) => {
 
 		const where = req.adm ? {} : { type: { $ne: 'combo' } }
 
-		Product.count(where, (err, count) => {
+		Product.countDocuments(where, (err, count) => {
 			if (err) {
 				res.status(500).send()
 			} else {
@@ -68,7 +69,7 @@ exports.qtd = (req, res) => {
 
 exports.store = (req, res) => {
 	try {
-		const { title,  description, brand_id, type } = req.body,
+		const { title,  description, brand_id, type_id } = req.body,
 			thumbnail = path.parse(req.file.originalname).name
 
 		let { item_included, price_from, price_to, promotion } = req.body
@@ -83,43 +84,59 @@ exports.store = (req, res) => {
 		Brand.findById(brand_id)
 			.then(brand => {
 				if (brand) {
-					const _document = {
-						title: title.trim(),
-						item_included, 
-						description: description.trim(),
-						brand: brand.title,
-						brand_id,
-						thumbnail,
-						price: {
-							// _from: price_from,
-							to: price_to
-						},
-						type,
-						insired: new Date().toLocaleString()
-						// promotion
-					}
-		
-					Product.create(_document)
-						.then(product => {
-							Brand.updateOne({ _id: brand._id }, { products: brand.products + 1 })
-								.then(_ => {
-									res.status(201).json({ ok: true, data: product._doc })
-								})
-								.catch(_ => {
-									Product.findByIdAndDelete(product._doc._id)
-										.then(_ => {
-											res.status(200).json({ ok: false, message: 'Erro ao atualizar a marca' })
-										})
-										.catch(_ => {
-											res.status(500).send()
-										})
-								})
-						})
-						.catch(_ => {
-							functions.delFolder(req, 'products')
-								.finally(() => {
-									res.status(400).send()
-								})
+
+					Type.findById(type_id)
+						.then(type => {
+
+							if (type) {
+
+								const _document = {
+									title: title.trim(),
+									item_included, 
+									description: description.trim(),
+									brand: brand.title,
+									brand_id,
+									type: type.name,
+									type_id,
+									thumbnail,
+									price: {
+										// _from: price_from,
+										to: price_to
+									},
+									insired: new Date().toLocaleString()
+									// promotion
+								}
+					
+								Product.create(_document)
+									.then(product => {
+										Brand.updateOne({ _id: brand._id }, { products: brand.products + 1 })
+											.then(_ => {
+												res.status(201).json({ ok: true, data: product._doc })
+											})
+											.catch(_ => {
+												Product.findByIdAndDelete(product._doc._id)
+													.then(_ => {
+														res.status(200).json({ ok: false, message: 'Erro ao atualizar a marca' })
+													})
+													.catch(_ => {
+														res.status(500).send()
+													})
+											})
+									})
+									.catch(_ => {
+										functions.delFolder(req, 'products')
+											.finally(() => {
+												res.status(400).send()
+											})
+									})
+
+							} else {
+								functions.delFolder(req, 'products')
+									.finally(() => {
+										res.status(200).json({ ok: false, message: 'Tipo não encontrado' })
+									})
+							}
+
 						})
 		
 				} else {

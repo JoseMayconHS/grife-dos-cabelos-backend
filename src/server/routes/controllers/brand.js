@@ -53,7 +53,7 @@ exports.indexBy = (req, res) => {
     
     const { page = 1 } = req.params
     
-    Brand.count(where, (err, count) => {
+    Brand.countDocuments(where, (err, count) => {
       if (err) {
         res.status(500).send
       } else {
