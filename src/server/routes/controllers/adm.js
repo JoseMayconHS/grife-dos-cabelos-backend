@@ -1,5 +1,7 @@
 const bcryptjs = require('bcryptjs'),
   Adm = require('../../../data/Schemas/Adm'),
+  Brand = require('../../../data/Schemas/Brand'),
+  Type = require('../../../data/Schemas/Type'),
   functions = require('../../../functions')
 
 exports.store = (req, res) => {
@@ -150,5 +152,34 @@ exports.reconnect = (req, res) => {
 
   } catch(err) {
     res.status(500).send(err)
+  }
+}
+
+exports.formSelects = (req, res) => {
+  try {
+
+    Type.find({}, 'name')
+      .then(typesDocument => {
+
+        Brand.find({}, 'title')
+          .then(brandsDocument => {
+
+            res.status(200).json({ 
+              ok: true, 
+              data: { types: typesDocument, brands: brandsDocument } 
+            })
+
+          })
+          .catch(() => {
+            res.status(200).json({ ok: false, message: 'Erro ao buscar marcas disponíveis' })
+          })
+
+      })
+      .catch(() => {
+        res.status(200).json({ ok: false, message: 'Erro ao buscar tipos disponíveis' })
+      })
+
+  } catch(e) {
+    res.status(500).send()
   }
 }

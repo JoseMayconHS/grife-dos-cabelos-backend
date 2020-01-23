@@ -1,6 +1,7 @@
 const route = require('express').Router(),
 	productControllers = require('../controllers/product')
 	userControllers = require('../controllers/user'),
+	admControllers = require('../controllers/adm'),
 	brandControllers = require('../controllers/brand'),
 	typeControllers = require('../controllers/type'),
 	pushNotificationControllers = require('../controllers/pushNotification')
@@ -27,7 +28,9 @@ route
 	.get('/admin/dashboard/qtd/product', productControllers.qtd)
 	.get('/admin/dashboard/qtd/brand', brandControllers.qtd)
 	.get('/admin/dashboard/qtd/expo', pushNotificationControllers.qtd)
-	//Notificações
+	// Notificações
 	.get('/admin/dashboard/notifications', pushNotificationControllers.recents)
+	// Formulário
+	.get('/admin/dashboard/form', admControllers.formSelects)
 
 module.exports = app => app.use(route)
