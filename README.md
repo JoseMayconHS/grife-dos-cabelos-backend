@@ -25,6 +25,7 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/private/both/product/:page` : Busca todos os produtos;
 	-	`/private/both/product/by/:page` : Realiza um filtro nos produtos;
 	- `/private/both/brand/by/:page` : Realiza um filtro nas marcas;
+	- `/private/both/type/by/:page` : Realiza um filtro nos tipos;
 	- `/private/both/product/search/:word/:page` : Pesquisa por porduto;
 	- `/private/both/brand/search/:word/:page` : Pesquisa por marcas;
 	- `/admin/dashboard/user/search/:word/:page` : Pesquisa por clientes;

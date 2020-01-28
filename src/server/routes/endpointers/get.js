@@ -19,6 +19,7 @@ route
 	.get('/private/app/swiper', productControllers.swiper)
 	// Tipos
 	.get('/private/both/type/:page', typeControllers.indexAll)
+	.get('/private/both/type/by/:page', typeControllers.indexBy)
 	// --- Dashboard ---
 	// Usuário
 	.get('/admin/dashboard/user/:page', userControllers.indexAll)	

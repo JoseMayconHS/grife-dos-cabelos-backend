@@ -1,5 +1,6 @@
 const path = require('path'),
   Brand = require('../../../data/Schemas/Brand'),
+  Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   functions =  require('../../../functions'),
   limit = 12
@@ -129,6 +130,7 @@ exports.remove = (req, res) => {
       .then(list => {
         if (list.forEach) {
           let error = false
+          
           const forEachToFunctions = list.map(({ thumbnail }) => {
             return function(next) {
               functions.delFolder(req, 'products', thumbnail)
@@ -141,6 +143,44 @@ exports.remove = (req, res) => {
                 })
             }
           })
+
+          const recalcTypeProducts = list.map(({ type_id }) => {
+            return function(next) {
+              Type.findById(type_id)
+                .then(type => {
+                  Type.updateOne({ _id: type_id }, { products: type.products - 1 })
+                    .then(() => {
+                      next && next()
+                    })
+                    .catch(() => {
+                      error = true
+                      next && next()
+                    })
+                }).catch(_ => {
+                  error = true
+                  next && next()
+                })
+            }
+          })
+
+          // const recalcBrandProducts = list.map(({ brand_id }) => {
+          //   return function(next) {
+          //     Brand.findById(brand_id)
+          //       .then(brand => {
+          //         Brand.updateOne({ _id: brand_id }, { products: brand.products - 1 })
+          //           .then(() => {
+          //             next && next()
+          //           })
+          //           .catch(() => {
+          //             error = true
+          //             next && next()
+          //           })
+          //       }).catch(_ => {
+          //         error = true
+          //         next && next()
+          //       })
+          //   }
+          // })
 
           const delDocuments = () => {
             Product.deleteMany({ brand_id: _id })
@@ -168,7 +208,7 @@ exports.remove = (req, res) => {
               })
           }
 
-          functions.middleware(...forEachToFunctions, delDocuments)
+          functions.middleware(...forEachToFunctions, ...recalcTypeProducts,  delDocuments)
         } else {
           res.status(500).send()
         }
@@ -187,26 +227,25 @@ exports.update = (req, res) => {
 
     const { _id } = req.params
 
-    Brand.findById(_id)
-      .then(({ _doc }) => {
-
-        Product.updateMany({ brand: _doc.title }, { brand: req.body.title })
-          .then(() => {
-            Brand.updateOne({ _id }, req.body)
-              .then(() => {
-                res.status(200).send()
-              })
-              .catch(() => {
-                res.status(500).send()
-              })
-          })
-          .catch(() => {
-            res.status(500).send()
-          })
-
-      })
-      .catch(() => {
-        res.status(400).send()
+    Brand.findOne({ title: req.body.title })
+      .then(brandExists => {
+        if (brandExists) {
+          res.status(200).json({ ok: false, message: 'Já existe uma marca com esse nome' })
+        } else {
+          Product.updateMany({ brand_id: _id }, { brand: req.body.title })
+            .then(() => {
+              Brand.updateOne({ _id }, req.body)
+                .then(() => {
+                  res.status(200).json({ ok: true })
+                })
+                .catch(() => {
+                  res.status(500).send()
+                })
+            })
+            .catch(() => {
+              res.status(500).send()
+            })
+        }
       })
 
   } catch(e) {

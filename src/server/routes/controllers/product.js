@@ -3,7 +3,7 @@ const path = require('path'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 4
+	limit = 1
 
 
 exports.indexAll = (req, res) => {
@@ -72,7 +72,21 @@ exports.store = (req, res) => {
 		const { title,  description, brand_id, type_id, insired } = req.body,
 			thumbnail = path.parse(req.file.originalname).name
 
-		
+		const delDocAndFile = id => {
+			Product.findByIdAndDelete(id)
+				.then(_ => {
+					functions.delFolder(req, 'products')
+						.finally(() => {
+							res.status(200).json({ ok: false, message: 'Erro ao atualizar a marca' })
+						})
+				})
+				.catch(_ => {
+					functions.delFolder(req, 'products')
+						.finally(() => {
+							res.status(500).send()
+						})
+				})
+		}
 
 		let { item_included, price_from, price_to, promotion } = req.body
 
@@ -113,22 +127,16 @@ exports.store = (req, res) => {
 									.then(product => {
 										Brand.updateOne({ _id: brand._id }, { products: brand.products + 1 })
 											.then(_ => {
-												res.status(201).json({ ok: true, data: product._doc })
-											})
-											.catch(_ => {
-												Product.findByIdAndDelete(product._doc._id)
+												Type.updateOne({ _id: type_id }, { products: type.products + 1 })
 													.then(_ => {
-														functions.delFolder(req, 'products')
-															.finally(() => {
-																res.status(200).json({ ok: false, message: 'Erro ao atualizar a marca' })
-															})
+														res.status(201).json({ ok: true, data: product._doc })
 													})
 													.catch(_ => {
-														functions.delFolder(req, 'products')
-															.finally(() => {
-																res.status(500).send()
-															})
+														delDocAndFile(product._doc._id)
 													})
+											})
+											.catch(_ => {
+												delDocAndFile(product._doc._id)
 											})
 									})
 									.catch(_ => {
@@ -168,7 +176,6 @@ exports.store = (req, res) => {
 			})
 
 	} catch(err) {
-		console.log({ err })
 		functions.delFolder(req, 'products')
 			.finally(() => {
 				res.status(500).send()
@@ -210,7 +217,7 @@ exports.indexBy = (req, res) => {
 
 		const { page = 1 } = req.params
 
-		Product.count(where, (err, count) => {
+		Product.countDocuments(where, (err, count) => {
 			if (err) {
 				res.status(500).send()
 			} else {
@@ -242,16 +249,27 @@ exports.remove = (req, res) => {
 					.then(brand => {
 						Brand.updateOne({ _id: product.brand_id }, { products: brand.products - 1 })
 							.then(() => {
-								functions.delFolder(null, 'products', product.thumbnail)
-									.finally(() => {
-										Product.deleteOne({ _id })
-											.then(_ => {
-												res.status(200).json({ ok: true })
-											})
-											.catch(_ => {
+								Type.findById(product.type_id)
+									.then(type => {
+										Type.updateOne({ _id: product.type_id }, { products: type.products - 1 })
+											.then(() => {
+												functions.delFolder(null, 'products', product.thumbnail)
+													.finally(() => {
+														Product.deleteOne({ _id })
+															.then(_ => {
+																res.status(200).json({ ok: true })
+															})
+															.catch(_ => {
+																res.status(500).send()
+															})
+													})
+											}).catch(() => {
 												res.status(500).send()
 											})
+									}).catch(() => {
+										res.status(500).send()
 									})
+								
 							}).catch(() => {
 								res.status(500).send()
 							})
