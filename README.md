@@ -36,7 +36,9 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/private/app/user` : Atualiza um usuário;
 	- `/admin/dashboard/product/:_id` : Atualiza um produto;	
 	- `/admin/dashboard/brand/:_id` : Atualiza uma marca;
-	- `/admin/dashboard/type/:_id` : Atualiza um tipo.
+	- `/admin/dashboard/type/:_id` : Atualiza um tipo;
+	- `/admin/dashboard/product/thumbnail/:_id` : Atualiza a imagem do produto;
+	- `/admin/dashboard/brand/thumbnail/:_id` : Atualiza a imagem da marca.
 - DELETE
 	- `/admin/dashboard/brand/:_id` : Delete uma marca;
 	- `/admin/dashboard/product/:_id` : Deleta um produto;

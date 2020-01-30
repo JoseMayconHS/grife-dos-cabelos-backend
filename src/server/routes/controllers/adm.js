@@ -1,8 +1,33 @@
 const bcryptjs = require('bcryptjs'),
   Adm = require('../../../data/Schemas/Adm'),
   Brand = require('../../../data/Schemas/Brand'),
+  Product = require('../../../data/Schemas/Product'),
   Type = require('../../../data/Schemas/Type'),
+  User = require('../../../data/Schemas/User'),
   functions = require('../../../functions')
+
+exports.cards = (req, res)   => {
+  try {
+
+    Brand.countDocuments((err1, brands) => {
+      Type.countDocuments((err2, types) => {
+        User.countDocuments((err3, clients) => {
+          Product.countDocuments((err4, products) => {
+            res.status(200).json({ ok: true, data: { 
+              brands: typeof +brands === 'number' ? +brands : 'falhou ❌',
+              types: typeof +types === 'number' ? +types : 'falhou ❌',
+              clients: typeof +clients === 'number' ? +clients : 'falhou ❌',
+              products: typeof +products === 'number' ? +products : 'falhou ❌',
+             }})
+          })
+        })
+      })
+    })
+
+  }catch(e) {
+    res.status(500).send()
+  }
+}
 
 exports.store = (req, res) => {
   try {

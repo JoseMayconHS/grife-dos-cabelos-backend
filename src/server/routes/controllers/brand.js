@@ -1,9 +1,8 @@
-const path = require('path'),
-  Brand = require('../../../data/Schemas/Brand'),
+const Brand = require('../../../data/Schemas/Brand'),
   Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   functions =  require('../../../functions'),
-  limit = 12
+  limit = 20
 
 exports.indexAll = (req, res) => {
   try {
@@ -82,7 +81,7 @@ exports.indexBy = (req, res) => {
 exports.store = (req, res) => {
   try {
     const { title } = req.body,
-      thumbnail = path.parse(req.file.originalname).name
+      thumbnail = req.file.filename
 
     const _document = {
       title: title.trim(),
@@ -270,5 +269,23 @@ exports.search = (req, res) => {
 
 	} catch(err) {
 		res.status(500).json(err)
+	}
+}
+
+exports.update_thumbnail = (req, res) => {
+  try {
+
+		const { _id } = req.params,
+			{ filename } = req.file
+
+			Brand.updateOne({ _id }, { thumbnail: filename })
+				.then(() => {
+					res.status(200).json({ ok: true })
+				})
+				.catch(() => {
+					res.status(200).json({ ok: false, message: 'Erro ao atualizar dado' })
+				})
+	} catch(e) {
+		res.status(500).send()
 	}
 }

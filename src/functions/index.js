@@ -8,20 +8,17 @@ const path = require('path'),
 exports.delFolder = (req, foldername, execption = false) => {
   return new Promise((resolve, reject) => {
     try {
-      const thumbnail = execption ? execption : path.parse(req.file.originalname).name,
+      const thumbnail = execption ? execption : req.file.filename,
         dir = path.resolve(__dirname, '..', 'static', foldername, thumbnail)
 
-      if (fs.existsSync(dir)) {
-        const files = fs.readdirSync(dir)
-
-        files
-          .forEach(file => {
-            fs.unlinkSync(path.resolve(dir, file))
-          })
-
-        fs.rmdirSync(dir)
+      try {
+        fs.unlink(dir, (err) => {
+          return err ? reject() : resolve()
+        })
+      } catch(e) {
+        reject()
       }
-      resolve()
+
     } catch(err) {
       reject()
     }

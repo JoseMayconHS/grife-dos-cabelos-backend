@@ -3,7 +3,7 @@ const bcryptjs = require('bcryptjs'),
   pdfTemplates = require('../../../data/pdf'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
-  limit = 12
+  limit = 20
 
 exports.buy = (req, res) => {
 

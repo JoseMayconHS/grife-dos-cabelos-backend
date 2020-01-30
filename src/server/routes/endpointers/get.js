@@ -33,5 +33,7 @@ route
 	.get('/admin/dashboard/notifications', pushNotificationControllers.recents)
 	// Formulário
 	.get('/admin/dashboard/form', admControllers.formSelects)
+	// Cards
+	.get('/admin/dashboard/cards', admControllers.cards)
 
 module.exports = app => app.use(route)

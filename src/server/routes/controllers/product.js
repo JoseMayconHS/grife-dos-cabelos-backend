@@ -1,9 +1,8 @@
-const path = require('path'),
-	Product = require('../../../data/Schemas/Product'),
+const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 1
+	limit = 20
 
 
 exports.indexAll = (req, res) => {
@@ -70,7 +69,7 @@ exports.qtd = (req, res) => {
 exports.store = (req, res) => {
 	try {
 		const { title,  description, brand_id, type_id, insired } = req.body,
-			thumbnail = path.parse(req.file.originalname).name
+			thumbnail = req.file.filename
 
 		const delDocAndFile = id => {
 			Product.findByIdAndDelete(id)
@@ -188,19 +187,138 @@ exports.update = (req, res) => {
 		const { _id } = req.params,
 			document = req.body
 
-		Product.updateOne({ _id }, document)
-				.then(rows => {
-
-					if (rows.nModified) {
-						res.status(200).json({ ok: true, message: 'Atualizado' })
+		if (document.title) {
+			Product.findOne({ title: document.title })
+				.then(productExists => {
+					if (productExists) {
+						res.status(200).json({ ok: false, message: 'Nome já existe!' })
 					} else {
-						res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-					}
+						Product.updateOne({ _id }, document)
+							.then(rows => {
 
+								if (rows.nModified) {
+									res.status(200).json({ ok: true, message: 'Atualizado' })
+								} else {
+									res.status(200).json({ ok: false, message: 'Nada foi alterado' })
+								}
+
+							})
+							.catch(_ => {
+								res.status(500).send()
+							})
+					}
 				})
-				.catch(_ => {
-					res.status(500).send()
-				})
+		} else {
+
+			if (document.type_id || document.brand_id) {
+				const { type_id, brand_id } = document
+
+				Product.findById(_id)
+					.then(product => {
+
+						if (product) {
+							if (type_id) {
+					
+								Type.findById(product.type_id)
+									.then(beforeType => {
+										Type.updateOne({ _id: beforeType._id }, { products: beforeType.products - 1 })
+											.then(() => {
+												Type.findById({ _id: type_id })
+													.then(actualType => {
+														Type.updateOne({ _id: type_id }, { products: actualType.products + 1 })
+															.then(() => {
+																Product.updateOne({ _id }, document)
+																	.then(rows => {
+
+																		if (rows.nModified) {
+																			res.status(200).json({ ok: true, message: 'Atualizado' })
+																		} else {
+																			res.status(200).json({ ok: false, message: 'Nada foi alterado' })
+																		}
+
+																	})
+																	.catch(_ => {
+																		res.status(500).send()
+																	})
+															}).catch(() => {
+																res.status(500).send()	
+															})
+													}).catch(() => {
+														res.status(500).send()	
+													})
+											}).catch(() => {
+												res.status(500).send()	
+											})
+									}).catch(() => {
+										res.status(500).send()	
+									})
+
+							} else if (brand_id) {
+			
+								Brand.findById(product.brand_id)
+									.then(beforeBrand => {
+										Brand.updateOne({ _id: beforeBrand._id }, { products: beforeBrand.products - 1 })
+											.then(() => {
+												Brand.findById({ _id: brand_id })
+													.then(actualBrand => {
+														Brand.updateOne({ _id: brand_id }, { products: actualBrand.products + 1 })
+															.then(() => {
+																Product.updateOne({ _id }, document)
+																	.then(rows => {
+
+																		if (rows.nModified) {
+																			res.status(200).json({ ok: true, message: 'Atualizado' })
+																		} else {
+																			res.status(200).json({ ok: false, message: 'Nada foi alterado' })
+																		}
+
+																	})
+																	.catch(_ => {
+																		res.status(500).send()
+																	})
+															}).catch(() => {
+																res.status(500).send()	
+															})
+													}).catch(() => {
+														res.status(500).send()	
+													})
+											}).catch(() => {
+												res.status(500).send()	
+											})
+									}).catch(() => {
+										res.status(500).send()	
+									})
+
+							} else {
+								res.status(400).send()
+							}
+						} else {
+							res.status(400).send()		
+						}
+
+					}).catch(() => {
+						res.status(500).send()	
+					})
+
+			} else {
+				if (document.item_included) 
+				document.item_included = document.item_included.split(',')
+
+				Product.updateOne({ _id }, document)
+					.then(rows => {
+
+						if (rows.nModified) {
+							res.status(200).json({ ok: true, message: 'Atualizado' })
+						} else {
+							res.status(200).json({ ok: false, message: 'Nada foi alterado' })
+						}
+
+					})
+					.catch(_ => {
+						res.status(500).send()
+					})
+			}
+		}
 
 	} catch(error) {
 		res.status(500).send()
@@ -226,6 +344,8 @@ exports.indexBy = (req, res) => {
 					.skip((limit * page) - limit)
 					.sort('-createdAt')
 					.then(Documents => {
+						if (where._id && !Documents[0]) return res.status(400).send()
+
 						res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit, count })
 					})
 					.catch(_ => {
@@ -304,5 +424,23 @@ exports.search = (req, res) => {
 
 	} catch(err) {
 		res.status(500).json(err)
+	}
+}
+
+exports.update_thumbnail = (req, res) => {
+	try {
+
+		const { _id } = req.params,
+			{ filename } = req.file
+
+			Product.updateOne({ _id }, { thumbnail: filename })
+				.then(() => {
+					res.status(200).json({ ok: true })
+				})
+				.catch(() => {
+					res.status(200).json({ ok: false, message: 'Erro ao atualizar dado' })
+				})
+	} catch(e) {
+		res.status(500).send()
 	}
 }
