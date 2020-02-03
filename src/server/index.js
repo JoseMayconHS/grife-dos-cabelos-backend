@@ -8,7 +8,7 @@ const express = require('express'),
 require('../data')
 
 app.use(cors({
-  origin: 'http://www.agenciacapiba.com.br'
+  origin: ['http://www.agenciacapiba.com.br', 'http://www.grifedoscabelos.com.br']
 }))
 app.use(express.json())
 app.use('/files', express.static(path.resolve(__dirname, '..', 'static')))
