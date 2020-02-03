@@ -9,7 +9,7 @@ const route = require('express').Router(),
 route
 	// Ambos
 	// Marca
-	.get('/', (req, res) => res.send('ok'))
+	.get('/', (req, res) => res.send('ok222222'))
 	.get('/app/user/generate', userControllers.generate)
 	.get('/private/both/brand/:page', brandControllers.indexAll)
 	.get('/private/both/brand/by/:page', brandControllers.indexBy)
