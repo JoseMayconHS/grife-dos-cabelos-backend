@@ -69,27 +69,29 @@ exports.store = (req, res) => {
                   Adm.create({ username: username.trim(), email: email.trim().toLowerCase(), password })
                     .then(({ _doc: data }) => {
 
-                      if (autoLogin) {
+                      Type.create({
+                        name: 'Combo',
+                        insired
+                      })
+                      .then(() => {})
+                      .catch(() => {})
+                      .finally(() => {
 
-                        functions.token(data)
-                          .then(token => {
-                            res.status(201).json({ ok: true, data: { ...data, password: undefined, token: `Bearer ${token}` } })
-                          })
-                          .catch(() => {
-                            res.status(201).json({ ok: true, data: { ...data, password: undefined } })
-                          })
+                        if (autoLogin) {
 
-                      } else {
-                        Type.create({
-                          name: 'Combo',
-                          insired
-                        })
-                        .then(() => {})
-                        .catch(() => {})
-                        .finally(() => {
+                          functions.token(data)
+                            .then(token => {
+                              res.status(201).json({ ok: true, data: { ...data, password: undefined, token: `Bearer ${token}` } })
+                            })
+                            .catch(() => {
+                              res.status(201).json({ ok: true, data: { ...data, password: undefined } })
+                            })
+  
+                        } else {
                           res.status(201).json({ ok: true, data: { ...data, password: undefined } })
-                        })
-                      }
+                        }
+
+                      })
 
                     })
                     .catch(_ => {
