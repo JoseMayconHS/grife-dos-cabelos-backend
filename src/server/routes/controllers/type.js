@@ -2,12 +2,12 @@ const Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   Brand = require('../../../data/Schemas/Brand'),
   functions =  require('../../../functions'),
-  limit = 20
+  limit = 6
 
 exports.store = (req, res) => {
   try {
 
-    const { name } = req.body
+    const { name, insired } = req.body
 
     Type.findOne({ name })
       .then(typeAllreadyExists => {
@@ -15,22 +15,25 @@ exports.store = (req, res) => {
           res.status(200).json({ ok: false, message: 'Tipo já existe' })
         } else {
 
-          Type.create({ name })
+          Type.create({ name, insired })
             .then(created => {
               res.status(201).json({ ok: true, data: created })
             })
-            .catch(() => {
+            .catch((er) => {
+              console.log({ er })
               res.status(500).send()    
             })
 
         }
          
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log({ e })
         res.status(500).send()    
       })
 
   } catch(err) {
+    console.log({ err })
     res.status(500).send()
   }
 }
@@ -38,26 +41,35 @@ exports.store = (req, res) => {
 
 exports.indexAll = (req, res) => {
   try {
-    const { page = 1 } = req.params
-
-    Type.countDocuments((err, count) => {
-      if (err) {
-        res.status(500).send(err)
-      } else {
-
-        Type.find()
-          .limit(limit)
-          .skip((limit * page) - limit)
-          .sort('-createdAt')
-          .then(Documents => {
-            res.status(200).json({ ok: true, data:  Documents, limit, count })
-          })
-          .catch(_ => {
-            res.status(500).send()
-          })
-
-      }
-    })
+    const { page = 1 } = req.params,
+      { app } = req.query
+    if (app) {
+      Type.find()
+        .then(types => {
+          res.status(200).json({ ok: true, data: types })
+        }).catch(() => {
+          res.status(500).send()
+        })
+    } else {
+      Type.countDocuments((err, count) => {
+        if (err) {
+          res.status(500).send(err)
+        } else {
+  
+          Type.find()
+            .limit(limit)
+            .skip((limit * page) - limit)
+            .sort('-createdAt')
+            .then(Documents => {
+              res.status(200).json({ ok: true, data:  Documents, limit, count })
+            })
+            .catch(_ => {
+              res.status(500).send()
+            })
+  
+        }
+      })
+    }
 
   } catch(err) {
     res.status(500).send()

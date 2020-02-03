@@ -2,7 +2,7 @@ const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 20
+	limit = 4
 
 
 exports.indexAll = (req, res) => {
@@ -37,14 +37,19 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
-		Product.find({ type: 'combo' })
-			.then(Documents => {
-				res.status(200).json({ ok: true, data: Documents })
+		Type.findOne({ swiper: true }, '_id')
+			.then(typeSwiper => {
+				Product.find({ type_id: typeSwiper._id })
+					.then(Documents => {
+						res.status(200).json({ ok: true, data: Documents })
+					})
+					.catch(err => {
+						res.status(500).json({ ok: false })
+					})
 			})
 			.catch(err => {
 				res.status(500).json({ ok: false })
 			})
-
 	} catch(err) {
 		res.status(500).send(err)
 	}
@@ -124,9 +129,9 @@ exports.store = (req, res) => {
 					
 								Product.create(_document)
 									.then(product => {
-										Brand.updateOne({ _id: brand._id }, { products: brand.products + 1 })
+										Brand.updateOne({ _id: brand._id }, { products: brand.products + 1, insired })
 											.then(_ => {
-												Type.updateOne({ _id: type_id }, { products: type.products + 1 })
+												Type.updateOne({ _id: type_id }, { products: type.products + 1, insired })
 													.then(_ => {
 														res.status(201).json({ ok: true, data: product._doc })
 													})
@@ -185,7 +190,8 @@ exports.store = (req, res) => {
 exports.update = (req, res) => {
 	try {
 		const { _id } = req.params,
-			document = req.body
+			document = req.body,
+			insired = req.body.insired
 
 		if (document.title) {
 			Product.findOne({ title: document.title })
@@ -221,11 +227,11 @@ exports.update = (req, res) => {
 					
 								Type.findById(product.type_id)
 									.then(beforeType => {
-										Type.updateOne({ _id: beforeType._id }, { products: beforeType.products - 1 })
+										Type.updateOne({ _id: beforeType._id }, { products: beforeType.products - 1, insired })
 											.then(() => {
 												Type.findById({ _id: type_id })
 													.then(actualType => {
-														Type.updateOne({ _id: type_id }, { products: actualType.products + 1 })
+														Type.updateOne({ _id: type_id }, { products: actualType.products + 1, insired })
 															.then(() => {
 																Product.updateOne({ _id }, document)
 																	.then(rows => {
@@ -257,11 +263,11 @@ exports.update = (req, res) => {
 			
 								Brand.findById(product.brand_id)
 									.then(beforeBrand => {
-										Brand.updateOne({ _id: beforeBrand._id }, { products: beforeBrand.products - 1 })
+										Brand.updateOne({ _id: beforeBrand._id }, { products: beforeBrand.products - 1, insired })
 											.then(() => {
 												Brand.findById({ _id: brand_id })
 													.then(actualBrand => {
-														Brand.updateOne({ _id: brand_id }, { products: actualBrand.products + 1 })
+														Brand.updateOne({ _id: brand_id }, { products: actualBrand.products + 1, insired })
 															.then(() => {
 																Product.updateOne({ _id }, document)
 																	.then(rows => {
@@ -331,7 +337,9 @@ exports.indexBy = (req, res) => {
 
 		if (where.promotion) where.promotion = +where.promotion > 0 ? true : false
 
-		if (where.brand_id && !req.adm) where = { ...where, type: { $ne: 'combo' } }
+		if (where.brand_id && !req.adm) where = { ...where, type: { $ne: 'Combo' } }
+
+		// if (where.brand_id)
 
 		const { page = 1 } = req.params
 
@@ -361,7 +369,7 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { _id } = req.params
+		const { _id } = req.paramsinsired = req.body.insired
 
 		Product.findById(_id)
 			.then(product => {
@@ -431,9 +439,10 @@ exports.update_thumbnail = (req, res) => {
 	try {
 
 		const { _id } = req.params,
-			{ filename } = req.file
+			{ filename } = req.file,
+			{ insired } = req.body
 
-			Product.updateOne({ _id }, { thumbnail: filename })
+			Product.updateOne({ _id }, { thumbnail: filename, insired })
 				.then(() => {
 					res.status(200).json({ ok: true })
 				})

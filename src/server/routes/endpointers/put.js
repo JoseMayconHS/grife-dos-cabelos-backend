@@ -9,6 +9,7 @@ const route = require('express').Router(),
 	putBrand = multer({ storage: updateBrandThumbnail, fileFilter })
 
 route
+	.put('/app/user/changepassword/:_id', userControllers.changepassword)
 	// App
 	.put('/private/app/user', userControllers.update)
 	// Dashboard

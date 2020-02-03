@@ -3,6 +3,7 @@ const bcryptjs = require('bcryptjs'),
   pdfTemplates = require('../../../data/pdf'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
+  generatePassword = require('generate-password'),
   limit = 20
 
 exports.buy = (req, res) => {
@@ -21,6 +22,67 @@ exports.buy = (req, res) => {
     })
 
 } 
+
+exports.changepassword = (req, res) => {
+  try {
+    const { _id } = req.params
+    let { password } = req.body
+
+    password = functions.criptor(password)
+
+    User.updateOne({ _id }, { password })
+      .then(() => {
+        res.status(200).json({ ok: true })
+      })
+      .catch(() => {
+        res.status(400).send()
+      })
+
+  } catch(e) {
+    res.status(500).send()
+  }
+}
+
+exports.generate = (req, res) => {
+  try {
+    const password = generatePassword.generate({
+      length: 8,
+      numbers: true,
+      uppercase: false
+    })
+
+    res.status(200).json({ ok: true, data: password }) 
+  } catch(e) {
+    res.status(500).send()
+  }
+}
+
+exports.forgot = (req, res) => {
+  try {
+
+    const { username, cellphone } = req.body
+
+    User.findOne({ username: username.trim() })
+      .then(user => {
+        if (user) {
+
+          if (cellphone === user.cellphone) {
+            res.status(200).json({ ok: true, data: user._id })  
+          } else {
+            res.status(200).json({ ok: false, message: 'Este telefone é diferente' })  
+          }
+
+        } else {
+          res.status(200).json({ ok: false, message: 'Usuário não encontrado' })
+        }
+      }).catch(() => {
+        res.status(500).send()
+      })
+
+  } catch(e) {
+    res.status(500).send()
+  }
+}
 
 exports.qtd = (req, res) => {
   try {
@@ -232,3 +294,4 @@ exports.search = (req, res) => {
 		res.status(500).json(err)
 	}
 }
+

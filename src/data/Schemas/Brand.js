@@ -13,7 +13,11 @@ const Brand = new Schema({
   thumbnail: {
     type: String,
     required: true
-  }
+  },
+  insired: {
+		type: String,
+		required: true
+	}
 }, {
   timestamps: { updatedAt: 'updated_at', createdAt: 'created_at' }
 })

@@ -9,6 +9,8 @@ const route = require('express').Router(),
 route
 	// Ambos
 	// Marca
+	.get('/', (req, res) => res.send('ok'))
+	.get('/app/user/generate', userControllers.generate)
 	.get('/private/both/brand/:page', brandControllers.indexAll)
 	.get('/private/both/brand/by/:page', brandControllers.indexBy)
 	.get('/private/both/brand/search/:word/:page', brandControllers.search)

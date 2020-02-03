@@ -80,12 +80,12 @@ exports.indexBy = (req, res) => {
 
 exports.store = (req, res) => {
   try {
-    const { title } = req.body,
+    const { title, insired } = req.body,
       thumbnail = req.file.filename
 
     const _document = {
       title: title.trim(),
-      thumbnail
+      thumbnail, insired
     }
     
     Brand.findOne({ title: title.trim() })
@@ -226,12 +226,14 @@ exports.update = (req, res) => {
 
     const { _id } = req.params
 
-    Brand.findOne({ title: req.body.title })
+    const { title } =  req.body
+
+    Brand.findOne({ title })
       .then(brandExists => {
         if (brandExists) {
           res.status(200).json({ ok: false, message: 'Já existe uma marca com esse nome' })
         } else {
-          Product.updateMany({ brand_id: _id }, { brand: req.body.title })
+          Product.updateMany({ brand_id: _id }, { brand: title })
             .then(() => {
               Brand.updateOne({ _id }, req.body)
                 .then(() => {
