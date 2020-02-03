@@ -32,7 +32,7 @@ exports.cards = (req, res)   => {
 exports.store = (req, res) => {
   try {
 
-    const { username, email, autoLogin } = req.body
+    const { username, email, autoLogin, insired } = req.body
     let { password } = req.body
 
     const alReadyAccount = cb => {
@@ -80,7 +80,15 @@ exports.store = (req, res) => {
                           })
 
                       } else {
-                        res.status(201).json({ ok: true, data: { ...data, password: undefined } })
+                        Type.create({
+                          name: 'Combo',
+                          insired
+                        })
+                        .then(() => {})
+                        .catch(() => {})
+                        .finally(() => {
+                          res.status(201).json({ ok: true, data: { ...data, password: undefined } })
+                        })
                       }
 
                     })
