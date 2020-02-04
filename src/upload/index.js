@@ -61,9 +61,10 @@ exports.updateProductThumbnail = multer.diskStorage({
           }
         }
 
-        const filename = path.parse(product.thumbnail).name
+        // const filename = path.parse(product.thumbnail).name
 
-        cb(null, `${filename}${n_ext}`)  
+        cb(null, `product_${Date.now()}${n_ext}`)
+        // cb(null, `${filename}${n_ext}`)  
       })
       .catch((e) => {
         cb(e)
@@ -97,9 +98,10 @@ exports.updateBrandThumbnail = multer.diskStorage({
           }
         }
 
-        const filename = path.parse(brand.thumbnail).name
+        // const filename = path.parse(brand.thumbnail).name
 
-        cb(null, `${filename}${n_ext}`)  
+        cb(null, `brand_${Date.now()}${n_ext}`)
+        // cb(null, `${filename}${n_ext}`)  
       })
       .catch((e) => {
         cb(e)
