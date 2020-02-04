@@ -7,6 +7,7 @@ const route = require('express').Router(),
 	pushNotificationControllers = require('../controllers/pushNotification')
 
 route
+	.get('/debug', (req, res) => res.send('<h1>Funcionando....</h1>'))
 	// Ambos
 	// Marca
 	.get('/app/user/generate', userControllers.generate)
