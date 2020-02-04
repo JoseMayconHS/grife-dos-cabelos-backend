@@ -2,7 +2,7 @@ const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 4
+	limit = 20
 
 
 exports.indexAll = (req, res) => {

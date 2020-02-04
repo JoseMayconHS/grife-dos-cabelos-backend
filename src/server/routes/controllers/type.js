@@ -2,7 +2,7 @@ const Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   Brand = require('../../../data/Schemas/Brand'),
   functions =  require('../../../functions'),
-  limit = 6
+  limit = 20
 
 exports.store = (req, res) => {
   try {
