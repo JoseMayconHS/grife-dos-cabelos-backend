@@ -48,3 +48,4 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/admin/dashboard/user/:_id` : Deleta um cliente;
 	- `/admin/dashboard/notification/:index` : Deleta uma notificação das recentes;
 	- `/admin/dashboard/type/:_id` : Deleta um tipo.
+
