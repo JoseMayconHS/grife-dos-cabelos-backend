@@ -41,9 +41,12 @@ exports.updateProductThumbnail = multer.diskStorage({
     cb(null, dirProduct)
   },
   filename: function(req, file, cb) {
-    const { _id } = req.params
+    const { id } = req.params
 
-    Product.findById({ _id }, 'thumbnail')
+    req.db('product')
+      .where({ id })
+      .select('thumbnail')
+      .first()
       .then(product => {
         if (!product)
           return cb(new Error())
@@ -78,9 +81,12 @@ exports.updateBrandThumbnail = multer.diskStorage({
     cb(null, dirBrand)
   },
   filename: function(req, file, cb) {
-    const { _id } = req.params
+    const { id } = req.params
 
-    Brand.findById({ _id }, 'thumbnail')
+    req.db('brand')
+      .where({ id })
+      .select('thumbnail')
+      .first()
       .then(brand => {
         if (!brand)
           return cb(new Error())

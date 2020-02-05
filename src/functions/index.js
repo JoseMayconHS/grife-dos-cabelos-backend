@@ -33,12 +33,12 @@ exports.middleware = (...steps) => {
   stepByStep(0)
 }
 
-exports.token = _id => {
+exports.token = id => {
   return new Promise((resolve, reject) => {
     try {
       const exp = Math.floor((Date.now() / 1000) + (60 * 60 * 24 * 7))
 
-      jwt.sign({ _id, exp }, process.env.WORD_SECRET || 'cpb', (err, token) => {
+      jwt.sign({ id, exp }, process.env.WORD_SECRET || 'cpb', (err, token) => {
         if (err)
           return reject()
   
@@ -80,9 +80,9 @@ exports.authenticate_user = (req, res, next) => {
 
     this.verifyToken(hash)  
       .then(decoded => {
-        req._id = decoded._id
+        req.id = decoded.id
 
-        if (decoded._id.adm) req.adm = true
+        if (decoded.id.adm) req.adm = true
 
         next()
       })
@@ -110,8 +110,8 @@ exports.authenticate_adm = (req, res, next) => {
 
     this.verifyToken(hash)  
       .then(decoded => {
-        if (decoded._id.adm) {
-          req._id = decoded._id.value
+        if (decoded.id.adm) {
+          req.id = decoded.id.value
           req.adm = true
 
           return next()
