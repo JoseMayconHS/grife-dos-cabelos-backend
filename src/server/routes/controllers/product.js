@@ -40,7 +40,6 @@ exports.swiper = (req, res) => {
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id })
-					.sort('-createdAt')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
@@ -376,7 +375,7 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { _id } = req.paramsinsired = req.body.insired
+		const { _id } = req.params = req.body.insired
 
 		Product.findById(_id)
 			.then(product => {
