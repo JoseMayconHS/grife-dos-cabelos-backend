@@ -222,9 +222,9 @@ exports.update = (req, res) => {
 exports.sign = (req, res) => {
   try {
 
-    const { username, password } = req.body
+    const { cellphone, password } = req.body
 
-    User.findOne({ username: username.trim() })
+    User.findOne({ cellphone })
       .then(user => {
         try {
           if (!user) {
