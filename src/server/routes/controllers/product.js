@@ -2,7 +2,8 @@ const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 20
+	limit = process.env.LIMIT_PAGINATION || 10,
+	limit_swiper = process.env.SWIPER_LIMIT || 7
 
 
 exports.indexAll = (req, res) => {
@@ -40,6 +41,9 @@ exports.swiper = (req, res) => {
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id })
+					.limit(limit_swiper)
+					.skip((limit_swiper * page) - limit_swiper)
+					.sort('-createdAt')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
