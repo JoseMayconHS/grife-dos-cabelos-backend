@@ -37,6 +37,8 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
+		const { page = 1 } = req.params
+
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id })
