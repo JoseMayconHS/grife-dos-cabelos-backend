@@ -2,7 +2,7 @@ const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = process.env.LIMIT_PAGINATION || 10
+	limit = +process.env.LIMIT_PAGINATION || 10
 
 
 exports.indexAll = (req, res) => {
@@ -59,7 +59,7 @@ exports.swiper = (req, res) => {
 
 				req.db('product')
 					.where({ type_id: typeSwiper.id })
-					.limit(process.env.SWIPER_LIMIT || 10)
+					.limit(+process.env.SWIPER_LIMIT || 10)
 					.orderBy('id', 'desc')
 					.then(productsCombos => {
 						res.status(200).json({ ok: true, data: productsCombos })

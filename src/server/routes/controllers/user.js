@@ -4,33 +4,18 @@ const bcryptjs = require('bcryptjs'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
   generatePassword = require('generate-password'),
-  limit = process.env.LIMIT_PAGINATION || 10
-
-exports.buy = (req, res) => {
-
-  // const html = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'data', 'pdf', 'template.html'), { encoding: 'utf8' })
-  const html = pdfTemplates.template(req.body)
-
-  pdf.create(html, { directory: './', format: 'A4', orientation: 'landscape' })
-    .toFile('output.pdf', (err, fileInfo) => {
-      if (err) 
-        return console.log(err)
-
-      console.log(fileInfo)  
-
-        res.status(200).sendFile(fileInfo.filename)
-    })
-
-} 
+  limit = +process.env.LIMIT_PAGINATION || 10
 
 exports.changepassword = (req, res) => {
   try {
-    const { _id } = req.params
+    const { id } = req.params
     let { password } = req.body
 
     password = functions.criptor(password)
 
-    User.updateOne({ _id }, { password })
+    req.db('user')
+      .where({ id })
+      .update({ password })
       .then(() => {
         res.status(200).json({ ok: true })
       })
@@ -62,7 +47,9 @@ exports.forgot = (req, res) => {
 
     const { username, cellphone } = req.body
 
-    User.findOne({ username: username.trim() })
+    req.db('user')
+      .where({ username: username.trim() })
+      .first()
       .then(user => {
         if (user) {
 
@@ -87,12 +74,16 @@ exports.forgot = (req, res) => {
 exports.qtd = (req, res) => {
   try {
 
-      User.countDocuments((err, count) => {
-        if (err) {
-          res.status(500).send(err)
-        } else {
-          res.status(200).json({ count })
-        }
+    req.db('user')
+      .count('id')
+      .first()
+      .then(count => {
+        count = +Object.values(count)[0]
+
+        res.status(200).json({ count })
+      })
+      .catch(() => {
+        res.status(500).send()
       })
     
   } catch(err) {
@@ -103,24 +94,29 @@ exports.qtd = (req, res) => {
 exports.indexAll = (req, res) => {
   try {
 
-    User.countDocuments((err, count) => {
-      if (err) {
-        res.status(500).send()
-      } else {
+    req.db('user')
+      .count('id')
+      .first()
+      .then(count => {
+        count = +Object.values(count)[0]
+
         const { page } = req.params
 
-        User.find()
+        req.db('user')
           .limit(limit)
-          .skip((limit * page) - limit)
-          .sort('-createdAt')
-          .then(Documents => {
-            res.status(200).json({ ok: true, data: Documents, limit, count })
+          .offset(page * limit - limit)
+          .orderBy('id', 'desc')
+          .then(users => {
+            res.status(200).json({ ok: true, data: users, limit, count })
           })
           .catch(_ => {
             res.status(500).send()
           })
-      }
-    })
+
+      })
+      .catch(_ => {
+        res.status(500).send()
+      })
 
   } catch(e) {
     res.status(500).send()
@@ -134,12 +130,16 @@ exports.store = (req, res) => {
 
     let { password } = req.body
 
-    User.findOne({ username: username.trim() })
+    req.db('user')
+      .where({ username: username.trim() })
+      .first()
       .then(userByUsername => {
 
         if (!userByUsername) {
 
-          User.findOne({ cellphone })
+          req.db('user')
+            .where({ cellphone: cellphone.trim() })
+            .first()
             .then(userByCellphone => {
 
               if (!userByCellphone) {
@@ -147,15 +147,16 @@ exports.store = (req, res) => {
                 try {
 
                   password = functions.criptor(password)
-      
-                  User.create({ username: username.trim(), cellphone, password })
+
+                  req.db('user')
+                    .insert({ username: username.trim(), cellphone, password })
                     .then(user => {
-                      res.status(201).json({ ok: true, data: user._doc })
+                      res.status(201).json({ ok: true, data: user })
                     })
                     .catch(_ => {
                       res.status(200).json({ ok: false, message: 'Não criado' })
                     })
-      
+            
                 } catch(error) {
                   res.status(500).send()
                 }
@@ -164,6 +165,9 @@ exports.store = (req, res) => {
                 res.status(200).json({ ok: false, message: 'Telefone já cadastrado' })
               }
 
+            })
+            .catch(_ => {
+              res.status(500).send()
             })
           
         } else {
@@ -183,17 +187,19 @@ exports.store = (req, res) => {
 exports.update = (req, res) => {
   try {
 
-    User.findById(req._id)
+    req.db('user')
+      .where({ id: req.id })
+      .first()
       .then(user => {
         try {
 
           if (req.body.username) {
-            if (req.body.username === user._doc.username)
+            if (req.body.username === user.username)
               throw 'O nome é o mesmo'
           }
 
           if (req.body.cellphone) {
-            if (req.body.cellphone === user._doc.cellphone)
+            if (req.body.cellphone === user.cellphone)
               throw 'O número de telefone é o mesmo'
           }
 
@@ -201,7 +207,9 @@ exports.update = (req, res) => {
             req.body.password = functions.criptor(req.body.password)
           }
 
-          User.updateOne({ _id: req._id }, req.body)
+          req.db('user')
+            .where({ id: req.id })
+            .update({ ...req.body })
             .then(_ => {
               res.status(200).json({ ok: true, message: 'Alterado com sucesso' })
             })
@@ -212,7 +220,10 @@ exports.update = (req, res) => {
         } catch(message) {
           res.status(200).json({ ok: false, message })
         }
-      })    
+      })
+      .catch(() => {
+        res.status(500).send()
+      }) 
 
   } catch(e) {
     res.status(500).send()
@@ -222,22 +233,24 @@ exports.update = (req, res) => {
 exports.sign = (req, res) => {
   try {
 
-    const { username, password } = req.body
+    const { cellphone, password } = req.body
 
-    User.findOne({ username: username.trim() })
+    req.db('user')
+      .where({ cellphone: cellphone.trim() })
+      .first()
       .then(user => {
         try {
           if (!user) {
            throw 'Usuário não existe'
           } 
 
-          if (!bcryptjs.compareSync(password.trim().toLowerCase(), user._doc.password)) {
+          if (!bcryptjs.compareSync(password.trim().toLowerCase(), user.password)) {
             throw 'Senha inválida'
           }
 
-          functions.token(user._doc._id)
+          functions.token(user.id)
             .then(token => {
-              res.status(200).json({ ok: true, data: { ...user._doc, password: undefined }, token: `Bearer ${token}` })
+              res.status(200).json({ ok: true, data: { ...user, password: undefined }, token: `Bearer ${token}` })
             })
             .catch(() => {
               res.status(200).json({ ok: false, message: 'Erro ao gerar token' })
@@ -251,7 +264,6 @@ exports.sign = (req, res) => {
         res.status(500).send()
       })
 
-
   } catch(error) {
     res.status(500).send()
   }
@@ -260,9 +272,11 @@ exports.sign = (req, res) => {
 exports.remove = (req, res) => {
   try {
 
-    const { _id } = req.params
+    const { id } = req.params
 
-    User.deleteOne({ _id })
+    req.db('user')
+      .where({ id })
+      .del()
       .then(() => {
         res.status(200).send('Excluido com sucesso')
       })
