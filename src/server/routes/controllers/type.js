@@ -159,7 +159,7 @@ exports.remove = (req, res) => {
     Type.findById(_id, 'swiper')
       .then(type => {
         if (type.swiper) {
-          res.status(400).send()  
+          res.status(200).json({ ok: false, message: 'Esse tipo não pode ser apagado ⚠️' })  
         } else {
 
           Product.find({ type_id: _id })
