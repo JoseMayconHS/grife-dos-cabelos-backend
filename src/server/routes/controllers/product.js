@@ -37,13 +37,9 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
-		const { page = 1 } = req.params
-
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id })
-					.limit(7)
-					.skip((7 * page) - 7)
 					.sort('-createdAt')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })

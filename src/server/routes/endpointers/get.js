@@ -18,7 +18,7 @@ route
 	.get('/private/both/product/:page', productControllers.indexAll)
 	.get('/private/both/product/by/:page', productControllers.indexBy)
 	.get('/private/both/product/search/:word/:page', productControllers.search)
-	.get('/private/app/swiper/:page', productControllers.swiper)
+	.get('/private/app/swiper', productControllers.swiper)
 	// Tipos
 	.get('/private/both/type/:page', typeControllers.indexAll)
 	.get('/private/both/type/by/:page', typeControllers.indexBy)
