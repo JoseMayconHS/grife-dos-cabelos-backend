@@ -4,7 +4,7 @@ const bcryptjs = require('bcryptjs'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
   generatePassword = require('generate-password'),
-  limit = process.env.LIMIT_PAGINATION || 10
+  limit = +process.env.LIMIT_PAGINATION || 10
 
 exports.buy = (req, res) => {
 
