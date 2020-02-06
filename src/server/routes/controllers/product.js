@@ -37,27 +37,27 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
-		Product.find()
-			.then(Documents => {
-				res.status(200).json({ ok: true, data: Documents })
-			})
-			.catch(err => {
-				res.status(500).send()
-			})
-
-		// Type.findOne({ swiper: true }, '_id')
-		// 	.then(typeSwiper => {
-		// 		Product.find({ type_id: typeSwiper._id })
-		// 			.then(Documents => {
-		// 				res.status(200).json({ ok: true, data: Documents })
-		// 			})
-		// 			.catch(err => {
-		// 				res.status(500).send()
-		// 			})
+		// Product.find()
+		// 	.then(Documents => {
+		// 		res.status(200).json({ ok: true, data: Documents })
 		// 	})
 		// 	.catch(err => {
 		// 		res.status(500).send()
 		// 	})
+
+		Type.findOne({ swiper: true }, '_id')
+			.then(typeSwiper => {
+				Product.find({ type_id: typeSwiper._id })
+					.then(Documents => {
+						res.status(200).json({ ok: true, data: Documents })
+					})
+					.catch(err => {
+						res.status(500).send()
+					})
+			})
+			.catch(err => {
+				res.status(500).send()
+			})
 	} catch(err) {
 		res.status(500).send(err)
 	}
