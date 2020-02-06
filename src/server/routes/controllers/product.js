@@ -41,9 +41,9 @@ exports.swiper = (req, res) => {
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id })
-					.limit(limit_swiper)
-					.skip((limit_swiper * page) - limit_swiper)
-					.sort('-createdAt')
+					// .limit(limit_swiper)
+					// .skip((limit_swiper * page) - limit_swiper)
+					// .sort('-createdAt')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
