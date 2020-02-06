@@ -224,7 +224,7 @@ exports.sign = (req, res) => {
 
     const { cellphone, password } = req.body
 
-    User.findOne({ cellphone })
+    User.findOne({ cellphone: cellphone.trim() })
       .then(user => {
         try {
           if (!user) {
