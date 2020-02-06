@@ -49,11 +49,11 @@ exports.swiper = (req, res) => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
 					.catch(err => {
-						res.status(500).json({ ok: false })
+						res.status(500).send()
 					})
 			})
 			.catch(err => {
-				res.status(500).json({ ok: false })
+				res.status(500).send()
 			})
 	} catch(err) {
 		res.status(500).send(err)
