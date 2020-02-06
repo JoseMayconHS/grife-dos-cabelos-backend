@@ -3,7 +3,7 @@ const Product = require('../../../data/Schemas/Product'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
 	limit = +process.env.LIMIT_PAGINATION || 10,
-	limit_swiper = +process.env.SWIPER_LIMIT || 7
+	limit_swiper = 7
 
 
 exports.indexAll = (req, res) => {
