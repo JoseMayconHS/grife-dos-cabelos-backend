@@ -2,7 +2,7 @@ const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = 20
+	limit = +process.env.LIMIT_PAGINATION || 10
 
 
 exports.indexAll = (req, res) => {
