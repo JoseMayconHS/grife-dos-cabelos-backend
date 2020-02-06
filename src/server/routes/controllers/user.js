@@ -228,7 +228,7 @@ exports.sign = (req, res) => {
       .then(user => {
         try {
           if (!user) {
-           throw 'Usuário não existe'
+           throw 'Ninguém com este telefone'
           } 
 
           if (!bcryptjs.compareSync(password.trim().toLowerCase(), user._doc.password)) {
