@@ -148,10 +148,12 @@ exports.store = (req, res) => {
 
 exports.remove = (req, res) => {
   try {
-    const { id } = req.params
+    let { id } = req.params
 
-    if (typeof id !== 'string')
-      throw new Error()
+    id = +id
+
+    // if (typeof id !== 'string')
+    //   throw new Error()
 
     req.db('product')
       .where({ brand_id: id })

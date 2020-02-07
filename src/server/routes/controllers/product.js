@@ -59,7 +59,7 @@ exports.swiper = (req, res) => {
 
 				req.db('product')
 					.where({ type_id: typeSwiper.id })
-					.limit(+process.env.SWIPER_LIMIT || 10)
+					.limit(10)
 					.orderBy('id', 'desc')
 					.then(productsCombos => {
 						res.status(200).json({ ok: true, data: productsCombos })
@@ -234,108 +234,143 @@ exports.store = (req, res) => {
 
 exports.update = (req, res) => {
 	try {
-		const { _id } = req.params,
+		const { id } = req.params,
 			document = req.body,
 			insired = req.body.insired
 
 		if (document.title) {
-			Product.findOne({ title: document.title })
+
+			req.db('product')
+				.where({ title: document.title })
+				.first()
 				.then(productExists => {
 					if (productExists) {
 						res.status(200).json({ ok: false, message: 'Nome já existe!' })
 					} else {
-						Product.updateOne({ _id }, document)
-							.then(rows => {
 
-								if (rows.nModified) {
-									res.status(200).json({ ok: true, message: 'Atualizado' })
-								} else {
-									res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-								}
+						req.db('product')
+							.where({ id })
+							.update(document)
+							.then((rows) => {
+
+								res.status(200).json({ ok: true, message: 'Atualizado' })
 
 							})
 							.catch(_ => {
 								res.status(500).send()
 							})
+
 					}
 				})
+				.catch(() => {
+					res.status(500).send()	
+				})
+
 		} else {
 
 			if (document.type_id || document.brand_id) {
 				const { type_id, brand_id } = document
 
-				Product.findById(_id)
+				req.db('product')
+					.where({ id })
+					.first()
 					.then(product => {
 
 						if (product) {
 							if (type_id) {
-					
-								Type.findById(product.type_id)
+
+								req.db('type')
+									.where({ id: product.type_id })
+									.select('id', 'products')
+									.first()
 									.then(beforeType => {
-										Type.updateOne({ _id: beforeType._id }, { products: beforeType.products - 1, insired })
+
+										req.db('type')
+											.where({ id: beforeType.id })
+											.update({ products: beforeType.products - 1, insired })
 											.then(() => {
-												Type.findById({ _id: type_id })
+
+												req.db('type')
+													.where({ id: type_id })
+													.first()
 													.then(actualType => {
-														Type.updateOne({ _id: type_id }, { products: actualType.products + 1, insired })
+
+														req.db('type')
+															.where({ id: type_id })
+															.update({ products: actualType.products + 1, insired })
 															.then(() => {
-																Product.updateOne({ _id }, document)
-																	.then(rows => {
 
-																		if (rows.nModified) {
-																			res.status(200).json({ ok: true, message: 'Atualizado' })
-																		} else {
-																			res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-																		}
-
+																req.db('product')
+																	.where({ id })
+																	.update(document)
+																	.then(() => {
+																		res.status(200).json({ ok: true, message: 'Atualizado' })
 																	})
 																	.catch(_ => {
 																		res.status(500).send()
 																	})
+																	
 															}).catch(() => {
 																res.status(500).send()	
 															})
+															
 													}).catch(() => {
 														res.status(500).send()	
 													})
+													
 											}).catch(() => {
 												res.status(500).send()	
 											})
+
 									}).catch(() => {
 										res.status(500).send()	
 									})
 
 							} else if (brand_id) {
 			
-								Brand.findById(product.brand_id)
+								req.db('brand')
+									.where({ id: product.brand_id })
+									.select('id', 'products')
+									.first()
 									.then(beforeBrand => {
-										Brand.updateOne({ _id: beforeBrand._id }, { products: beforeBrand.products - 1, insired })
+
+										req.db('brand')
+											.where({ id: beforeBrand.id })
+											.update({ products: beforeBrand.products - 1, insired })
 											.then(() => {
-												Brand.findById({ _id: brand_id })
+
+												req.db('brand')
+													.where({ id: brand_id })
+													.first()
 													.then(actualBrand => {
-														Brand.updateOne({ _id: brand_id }, { products: actualBrand.products + 1, insired })
+
+														req.db('brand')
+															.where({ id: brand_id })
+															.update({ products: actualBrand.products + 1, insired })
 															.then(() => {
-																Product.updateOne({ _id }, document)
-																	.then(rows => {
 
-																		if (rows.nModified) {
-																			res.status(200).json({ ok: true, message: 'Atualizado' })
-																		} else {
-																			res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-																		}
-
+																req.db('product')
+																	.where({ id })
+																	.update(document)
+																	.then(() => {
+																		res.status(200).json({ ok: true, message: 'Atualizado' })
 																	})
 																	.catch(_ => {
 																		res.status(500).send()
 																	})
+																	
 															}).catch(() => {
 																res.status(500).send()	
 															})
+															
 													}).catch(() => {
 														res.status(500).send()	
 													})
+													
 											}).catch(() => {
 												res.status(500).send()	
 											})
+
 									}).catch(() => {
 										res.status(500).send()	
 									})
@@ -351,23 +386,21 @@ exports.update = (req, res) => {
 						res.status(500).send()	
 					})
 
+				
 			} else {
 				if (document.item_included) 
 				document.item_included = document.item_included.split(',')
 
-				Product.updateOne({ _id }, document)
-					.then(rows => {
-
-						if (rows.nModified) {
-							res.status(200).json({ ok: true, message: 'Atualizado' })
-						} else {
-							res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-						}
-
+				req.db('product')
+					.where({ id })
+					.update({ item_included: JSON.stringify(document.item_included) })
+					.then(() => {
+						res.status(200).json({ ok: true, message: 'Atualizado' })
 					})
 					.catch(_ => {
 						res.status(500).send()
 					})
+					
 			}
 		}
 
@@ -440,46 +473,79 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { _id } = req.paramsinsired = req.body.insired
+		const { id } = req.params
+		const insired = req.body.insired
 
-		Product.findById(_id)
+		req.db('product')
+			.where({ id })
+			.select('type_id', 'brand_id')
+			.first()
 			.then(product => {
-				Brand.findById(product.brand_id, 'products')
-					.then(brand => {
-						Brand.updateOne({ _id: product.brand_id }, { products: brand.products - 1 })
-							.then(() => {
-								Type.findById(product.type_id)
-									.then(type => {
-										Type.updateOne({ _id: product.type_id }, { products: type.products - 1 })
-											.then(() => {
-												functions.delFolder(null, 'products', product.thumbnail)
-													.finally(() => {
-														Product.deleteOne({ _id })
-															.then(_ => {
-																res.status(200).json({ ok: true })
-															})
-															.catch(_ => {
-																res.status(500).send()
-															})
-													})
-											}).catch(() => {
-												res.status(500).send()
-											})
-									}).catch(() => {
-										res.status(500).send()
-									})
-								
-							}).catch(() => {
-								res.status(500).send()
-							})
-					}).catch(() => {
-						res.status(500).send()
-					})
 
+				const updateBrand = (next) => {
+					req.db('brand')
+						.where({ id: product.brand_id })
+						.select('products')
+						.first()
+						.then(brand => {
+
+							req.db('brand')
+								.where({ id: product.brand_id })
+								.update({ products: brand.products - 1 })
+								.then(() => {
+
+									typeof next === 'function' && next()
+									
+								}).catch(() => {
+									res.status(500).send()
+								})
+								
+						}).catch(() => {
+							res.status(500).send()
+						})
+				}
+
+				const updateType = (next) => {
+					req.db('type')
+						.where({ id: product.type_id })
+						.select('products')
+						.first()
+						.then(type => {
+
+							req.db('type')
+								.where({ id: product.type_id })
+								.update({ products: type.products - 1 })
+								.then(() => {
+
+									typeof next === 'function' && next()
+									
+								}).catch(() => {
+									res.status(500).send()
+								})
+								
+						}).catch(() => {
+							res.status(500).send()
+						})
+				}
+
+				const delProduct = () => {
+					req.db('product')
+						.where({ id })
+						.del()
+						.then(() => {
+							res.status(200).json({ ok: true, message: 'apagado com sucesso' })
+						})
+						.catch(() => {
+							res.status(500).send()
+						})
+				}
+
+				functions.middleware(updateBrand, updateType, delProduct)
+					
 			})
 			.catch(() => {
 				res.status(500).send()
-			})
+			})			
 			
 	} catch(e) {
 		res.status(500).send()
@@ -509,17 +575,20 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
 	try {
 
-		const { _id } = req.params,
+		const { id } = req.params,
 			{ filename } = req.file,
 			{ insired } = req.body
 
-			Product.updateOne({ _id }, { thumbnail: filename, insired })
+			req.db('product')
+				.where({ id })
+				.update({ thumbnail: filename, insired })
 				.then(() => {
 					res.status(200).json({ ok: true })
 				})
 				.catch(() => {
 					res.status(200).json({ ok: false, message: 'Erro ao atualizar dado' })
 				})
+				
 	} catch(e) {
 		res.status(500).send()
 	}

@@ -6,13 +6,19 @@ const { Expo } = require('expo-server-sdk'),
 exports.qtd = (req, res) => {
   try {
 
-      ExpoModel.countDocuments((err, count) => {
-        if (err) {
-          res.status(500).send(err)
-        } else {
-          res.status(200).json({ count })
-        }
+    req.db('expo')
+      .count('id')
+      .first()
+      .then(count => {
+
+        count = +Object.values(count)[0]
+
+        res.status(200).json({ count })
       })
+      .catch(() => {
+        res.status(500).send()
+      })
+
     
   } catch(err) {
     res.status(500).send(err)
@@ -33,7 +39,8 @@ exports.send = (req, res) => {
     if (!title.length || !body.length)
       throw new Error()
 
-    ExpoModel.find({}, 'token')
+    req.db('expo')
+      .select('token')
       .then(async tokens => {
         const messagens = []
 
@@ -53,35 +60,43 @@ exports.send = (req, res) => {
         }
 
         const addInAdmData = (success, send) => {
-          Adm.findById(req._id)
-          .then(adm => {
-            try {
 
-              let newArray = [ ...adm.notifications]
-
-              newArray.unshift({
-                success,
-                title, body,
-                date
-              })
-
-              if (newArray.length >= 10) {
-                newArray = newArray.splice(0, 10)
+          req.db('adm')
+            .where({ id: req.id })
+            .select('notifications')
+            .first()
+            .then(adm => {
+              try {
+  
+                let newArray = [ ...JSON.parse(adm.notifications)]
+  
+                newArray.unshift({
+                  success,
+                  title, body,
+                  date
+                })
+  
+                if (newArray.length >= 10) {
+                  newArray = newArray.splice(0, 10)
+                }
+  
+                req.db('adm')
+                  .where({ id: req.id })
+                  .update({ notifications: JSON.stringify(newArray) })
+                  .then(() => {})
+                  .catch(() => {})
+                  .finally(() => {
+                    send()
+                  })
+    
+              } catch(e) {
+                send()
               }
-
-              
-
-              adm.notifications = newArray
-
-              Adm.updateOne({ _id: req._id }, adm, () => send())
-
-            } catch(e) {
+            })
+            .catch(() => {
               send()
-            }
-          })
-          .catch(() => {
-            send()
-          })
+            })
+          
         }
 
         const chunks = expo.chunkPushNotifications(messagens)
@@ -99,7 +114,7 @@ exports.send = (req, res) => {
       })
       .catch(() => {
         res.status(500).send()
-      })
+      })      
 
   } catch(e) {
     res.status(500).send()
@@ -114,10 +129,21 @@ exports.store = (req, res) => {
     if (!Expo.isExpoPushToken(token))
       return res.status(400).send()
 
-    
-    ExpoModel.updateOne({ token }, { token }, { upsert: true })
-      .then(() => {
-        res.status(201).json({ ok: true, message: 'Você será notificado dos avisos' })
+    req.db('expo')
+      .where({ token })
+      .first()
+      .then(already => {
+        if (already) return res.status(201).json({ ok: true, message: 'Você será notificado dos avisos' })
+
+        req.db('expo')
+          .insert({ token })
+          .then(() => {
+            res.status(201).json({ ok: true, message: 'Você será notificado dos avisos' })
+          })
+          .catch(() => {
+            res.status(201).json({ ok: false, message: 'Não será possivel mandar notificações' })
+          })
+
       })
       .catch(() => {
         res.status(201).json({ ok: false, message: 'Não será possivel mandar notificações' })
@@ -131,7 +157,10 @@ exports.store = (req, res) => {
 exports.recents = (req, res) => {
   try {
 
-    Adm.findById(req._id, 'notifications')
+    req.db('adm')
+      .where({ id: req.id })
+      .select('notifications')
+      .first()
       .then(adm => {
         try {
           if (!adm) 
@@ -140,7 +169,7 @@ exports.recents = (req, res) => {
           if (!adm.notifications)
             throw new Error()
 
-          res.status(200).json({ ok: true, data: adm.notifications })
+          res.status(200).json({ ok: true, data: JSON.parse(adm.notifications) })
 
         } catch(e) {
           res.status(200).json({ ok: false })
@@ -149,6 +178,7 @@ exports.recents = (req, res) => {
       .catch(e => {
         res.status(200).json({ ok: false })
       })
+      
 
   } catch(e) {
     res.status(200).json({ ok: false })
@@ -160,7 +190,10 @@ exports.remove = (req, res) => {
 
     const { index: deleteIt } = req.params
 
-    Adm.findById(req._id, 'notifications')
+    req.db('adm')
+      .where({ id: req.id })
+      .select('notifications')
+      .first()
       .then(adm => {
         try {
 
@@ -171,11 +204,19 @@ exports.remove = (req, res) => {
             throw new Error()
 
 
-          const newNotifications  = adm.notifications.filter((item, index) => +index !== +deleteIt)
+          const newNotifications  = JSON.parse(adm.notifications).filter((item, index) => +index !== +deleteIt)
 
           adm.notifications = [ ...newNotifications ]
 
-          Adm.updateOne({ _id: req._id }, adm, (err) => res.status(err ? 500 : 200).send())
+          req.db('adm')
+            .where({ id: req.id })
+            .update({ notifications: JSON.stringify(newNotifications) })
+            .then(() => {
+              res.status(200).send()
+            })
+            .catch(() => {
+              res.status(500).send()
+            })
 
         } catch(e) {
           res.status(500).send()
@@ -183,7 +224,7 @@ exports.remove = (req, res) => {
       })
       .catch(e => {
         res.status(500).send()
-      })
+      })      
 
   } catch(e) {
     res.status(500).send()

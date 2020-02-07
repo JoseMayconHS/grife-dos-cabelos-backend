@@ -9,31 +9,31 @@ exports.store = (req, res) => {
 
     const { name, insired } = req.body
 
-    Type.findOne({ name })
+    req.db('type')
+      .where({ name })
+      .first()
       .then(typeAllreadyExists => {
         if (typeAllreadyExists) {
           res.status(200).json({ ok: false, message: 'Tipo já existe' })
         } else {
 
-          Type.create({ name, insired })
-            .then(created => {
-              res.status(201).json({ ok: true, data: created })
+          req.db('type')
+            .insert({ name, insired })
+            .then(() => {
+              res.status(201).json({ ok: true })
             })
-            .catch((er) => {
-              console.log({ er })
+            .catch(() => {
               res.status(500).send()    
-            })
+            })            
 
         }
          
       })
       .catch((e) => {
-        console.log({ e })
         res.status(500).send()    
-      })
+      })      
 
   } catch(err) {
-    console.log({ err })
     res.status(500).send()
   }
 }
@@ -43,32 +43,39 @@ exports.indexAll = (req, res) => {
   try {
     const { page = 1 } = req.params,
       { app } = req.query
+  
     if (app) {
-      Type.find()
+
+      req.db('type')
         .then(types => {
           res.status(200).json({ ok: true, data: types })
         }).catch(() => {
           res.status(500).send()
         })
+        
     } else {
-      Type.countDocuments((err, count) => {
-        if (err) {
-          res.status(500).send(err)
-        } else {
-  
-          Type.find()
+
+      req.db('type')
+        .count('id')
+        .first()
+        .then(count => {
+          count = +Object.values(count)[0] 
+
+          req.db('type')
             .limit(limit)
-            .skip((limit * page) - limit)
-            .sort('-createdAt')
-            .then(Documents => {
-              res.status(200).json({ ok: true, data:  Documents, limit, count })
+            .offset(page * limit - limit)
+            .orderBy('id', 'desc')
+            .then(products => {
+              res.status(200).json({ ok: true, data: products, limit, count })
             })
             .catch(_ => {
               res.status(500).send()
             })
-  
-        }
-      })
+        })
+        .catch(_ => {
+          res.status(500).send()
+        })
+
     }
 
   } catch(err) {
@@ -81,26 +88,39 @@ exports.indexBy = (req, res) => {
     let where = req.query || {}
     
     const { page = 1 } = req.params
-    
-    Type.countDocuments(where, (err, count) => {
-      if (err) {
-        res.status(500).send
-      } else {
 
-        Type.find(where)
+    req.db('type')
+      .where(where)
+      .count('id')
+      .first()
+      .then(count => {
+        count = +Object.values(count)[0] 
+
+        req.db('type')
+          .where(where)
           .limit(limit)
-          .skip((limit * page) - limit)
-          .sort('-createdAt')
-          .then(Documents => {
-            res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit, count })
+          .offset(page * limit - limit)
+          .orderBy('id', 'desc')
+          .then(types => {
+
+            const data = where.id ? types[0] : types
+
+            if (data) {
+              res.status(200).json({ ok: true, data, limit, count })
+            } else {
+              res.status(400).send()
+            }
+
           })
           .catch(_ => {
             res.status(500).send()
           })
-
-      }
-    })
-			
+      
+      })
+      .catch(_ => {
+        res.status(500).send()
+      })
+    			
 	} catch(error) {
 		res.status(500).send()
 	}
@@ -110,40 +130,57 @@ exports.indexBy = (req, res) => {
 exports.update = (req, res) => {
   try {
 
-    const { _id } = req.params
+    const { id } = req.params
 
     if (req.body.name) {
 
-      Type.findOne({ name: req.body.name })
+      req.db('type')
+        .where({ name: req.body.name })
+        .first()
         .then(typeExists => {
           if (typeExists) {
             res.status(200).json({ ok: false, message: 'Já existe um tipo com esse nome' })
           } else {
 
-            Product.updateMany({ type_id: _id }, { type: req.body.name })
+            req.db('product')
+              .where({ type_id: id })
+              .update({ type: req.body.name })
               .then(() => {
-                Type.updateOne({ _id }, req.body, (err) => {
-                  if (err) {
-                    res.status(500).send()
-                  } else {
+
+                req.db('type')
+                  .where({ id })
+                  .update(req.body)
+                  .then(() => {
                     res.status(200).json({ ok: true })
-                  }
-                })
+                  })
+                  .catch(() => {
+                    res.status(500).send()
+
+                  })
+
               })
               .catch(() => {
                 res.status(500).send()
               })
+              
           }
-        })
+        }) 
+        .catch(() => {
+          res.status(500).send()
+        })       
 
     } else {
-      Type.updateOne({ _id }, req.body, (err) => {
-        if (err) {
-          res.status(500).send()
-        } else {
+
+      req.db('type')
+        .where({ id })
+        .update(req.body)
+        .then(() => {
           res.status(200).json({ ok: true })
-        }
-      })
+        })
+        .catch(() => {
+          res.status(500).send()
+        })
+
     }
 
   } catch(e) {
@@ -154,13 +191,16 @@ exports.update = (req, res) => {
 exports.remove = (req, res) => {
   try {
 
-    const { _id } = req.params
+    let { id } = req.params
 
-    if (typeof _id !== 'string')
-      throw new Error()
+    id = +id
 
+    // if (typeof _id !== 'string')
+    //   throw new Error()
 
-    Product.find({ type_id: _id })
+    req.db('product')
+      .where({ id })
+      .first()
       .then(list => {
         if (list && list.forEach) {
           let error = false
@@ -178,30 +218,17 @@ exports.remove = (req, res) => {
             }
           })
 
-          // const recalcTypeProducts = list.map(({ type_id }) => {
-          //   return function(next) {
-          //     Type.findById(type_id)
-          //       .then(type => {
-          //         Type.updateOne({ _id: type_id }, { products: type.products - 1 })
-          //           .then(() => {
-          //             next && next()
-          //           })
-          //           .catch(() => {
-          //             error = true
-          //             next && next()
-          //           })
-          //       }).catch(_ => {
-          //         error = true
-          //         next && next()
-          //       })
-          //   }
-          // })
-
           const recalcBrandProducts = list.map(({ brand_id }) => {
             return function(next) {
-              Brand.findById(brand_id)
+
+              req.db('brand')
+                .where({ id: brand_id })
+                .first()
                 .then(brand => {
-                  Brand.updateOne({ _id: brand_id }, { products: brand.products - 1 })
+
+                  req.db('brand')
+                    .where({ id: brand_id })
+                    .update({ products: brand.products - 1 })
                     .then(() => {
                       next && next()
                     })
@@ -209,30 +236,37 @@ exports.remove = (req, res) => {
                       error = true
                       next && next()
                     })
+                    
                 }).catch(_ => {
                   error = true
                   next && next()
                 })
+                
             }
           })
 
           const delDocuments = () => {
-            Product.deleteMany({ type_id: _id })
+
+            req.db('product')
+              .where({ type_id: id })
+              .del()
               .then(_ => {
 
-                Type.deleteOne({ _id }, (err) => {
-                  if (err) {
-                    res.status(500).send(err)
-                  } else {
-            
+                req.db('type')
+                  .where({ id })
+                  .del()
+                  .then(() => {
                     res.status(200).json({ ok: true, message: error ? 'Ocorreu alguns erros' : 'apagado com sucesso' })
-            
-                  }
-                })
+                  })
+                  .catch(() => {
+                    res.status(500).send()
+                  })
+
               })
               .catch(_ => {
                 res.sttaus(500).send()
               })
+              
           }
 
           functions.middleware(...forEachToFunctions, ...recalcBrandProducts, delDocuments)
@@ -243,6 +277,7 @@ exports.remove = (req, res) => {
       .catch(_ => {
         res.status(500).send()
       })
+      
   
   } catch(e) {
     res.status(500).send()
