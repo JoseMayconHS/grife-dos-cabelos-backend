@@ -44,6 +44,7 @@ exports.swiper = (req, res) => {
 		// 	.catch(err => {
 		// 		res.status(500).send()
 		// 	})
+		
 
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
