@@ -6,10 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # products files
-# *.png*
-# *.svg*
-# *.jpg*
-# *.jpeg*
+*.png*
+*.svg*
+*.jpg*
+*.jpeg*
 
 # Runtime data
 pids
