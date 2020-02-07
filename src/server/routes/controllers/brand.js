@@ -128,7 +128,7 @@ exports.store = (req, res) => {
 
 exports.remove = (req, res) => {
   try {
-    const { _id } = req.params
+    const { id: _id } = req.params
 
     if (typeof _id !== 'string')
       throw new Error()
@@ -232,7 +232,7 @@ exports.remove = (req, res) => {
 exports.update = (req, res) => {
   try {
 
-    const { _id } = req.params
+    const { id: _id } = req.params
 
     const { title } =  req.body
 
@@ -285,7 +285,7 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
   try {
 
-		const { _id } = req.params,
+		const { id: _id } = req.params,
 			{ filename } = req.file
 
 			Brand.updateOne({ _id }, { thumbnail: filename })

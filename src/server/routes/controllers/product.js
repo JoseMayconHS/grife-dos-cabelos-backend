@@ -197,7 +197,7 @@ exports.store = (req, res) => {
 
 exports.update = (req, res) => {
 	try {
-		const { _id } = req.params,
+		const { id: _id } = req.params,
 			document = req.body,
 			insired = req.body.insired
 
@@ -383,7 +383,7 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { _id } = req.params = req.body.insired
+		const { id: _id } = req.params = req.body.insired
 
 		Product.findById(_id)
 			.then(product => {
@@ -452,7 +452,7 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
 	try {
 
-		const { _id } = req.params,
+		const { id: _id } = req.params,
 			{ filename } = req.file,
 			{ insired } = req.body
 
