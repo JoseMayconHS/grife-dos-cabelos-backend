@@ -9,10 +9,12 @@ const express = require('express'),
 
 // require('../data')
 
+db.migrate.latest()
+
 app.use(cors({
   origin: 'http://www.grifedoscabelos.com.br'
 }))
-app.use(cors())
+// app.use(cors())
 app.use(express.json())
 app.use((req, res, next) => {
   req.db = db
