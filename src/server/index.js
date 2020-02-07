@@ -9,7 +9,7 @@ const express = require('express'),
 
 // require('../data')
 
-db.migrate.latest()
+// db.migrate.latest()
 
 app.use(cors({
   origin: 'http://www.grifedoscabelos.com.br'
