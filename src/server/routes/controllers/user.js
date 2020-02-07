@@ -54,7 +54,7 @@ exports.forgot = (req, res) => {
         if (user) {
 
           if (cellphone === user.cellphone) {
-            res.status(200).json({ ok: true, data: user._id })  
+            res.status(200).json({ ok: true, data: user.id })  
           } else {
             res.status(200).json({ ok: false, message: 'Este telefone é diferente' })  
           }
