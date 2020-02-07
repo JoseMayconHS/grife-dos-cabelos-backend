@@ -130,7 +130,11 @@ exports.indexBy = (req, res) => {
 exports.update = (req, res) => {
   try {
 
+<<<<<<< HEAD
     const { id } = req.params
+=======
+    const { id :_id } = req.params
+>>>>>>> mongodb
 
     if (req.body.name) {
 
@@ -191,7 +195,11 @@ exports.update = (req, res) => {
 exports.remove = (req, res) => {
   try {
 
+<<<<<<< HEAD
     let { id } = req.params
+=======
+    const { id: _id } = req.params
+>>>>>>> mongodb
 
     id = +id
 

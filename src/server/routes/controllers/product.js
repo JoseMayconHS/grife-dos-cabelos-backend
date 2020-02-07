@@ -234,7 +234,11 @@ exports.store = (req, res) => {
 
 exports.update = (req, res) => {
 	try {
+<<<<<<< HEAD
 		const { id } = req.params,
+=======
+		const { id: _id } = req.params,
+>>>>>>> mongodb
 			document = req.body,
 			insired = req.body.insired
 
@@ -488,8 +492,12 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
+<<<<<<< HEAD
 		const { id } = req.params
 		const insired = req.body.insired
+=======
+		const { id: _id } = req.params = req.body.insired
+>>>>>>> mongodb
 
 		req.db('product')
 			.where({ id })
@@ -590,7 +598,11 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
 	try {
 
+<<<<<<< HEAD
 		const { id } = req.params,
+=======
+		const { id: _id } = req.params,
+>>>>>>> mongodb
 			{ filename } = req.file,
 			{ insired } = req.body
 

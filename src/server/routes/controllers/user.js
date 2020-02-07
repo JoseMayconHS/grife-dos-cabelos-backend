@@ -8,7 +8,11 @@ const bcryptjs = require('bcryptjs'),
 
 exports.changepassword = (req, res) => {
   try {
+<<<<<<< HEAD
     const { id } = req.params
+=======
+    const { id: _id } = req.params
+>>>>>>> mongodb
     let { password } = req.body
 
     password = functions.criptor(password)
@@ -272,7 +276,11 @@ exports.sign = (req, res) => {
 exports.remove = (req, res) => {
   try {
 
+<<<<<<< HEAD
     const { id } = req.params
+=======
+    const { id: _id } = req.params
+>>>>>>> mongodb
 
     req.db('user')
       .where({ id })

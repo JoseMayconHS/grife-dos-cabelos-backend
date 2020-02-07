@@ -148,7 +148,11 @@ exports.store = (req, res) => {
 
 exports.remove = (req, res) => {
   try {
+<<<<<<< HEAD
     let { id } = req.params
+=======
+    const { id: _id } = req.params
+>>>>>>> mongodb
 
     id = +id
 
@@ -260,7 +264,11 @@ exports.remove = (req, res) => {
 exports.update = (req, res) => {
   try {
 
+<<<<<<< HEAD
     const { id } = req.params
+=======
+    const { id: _id } = req.params
+>>>>>>> mongodb
 
     const { title } =  req.body
 
@@ -329,6 +337,7 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
   try {
 
+<<<<<<< HEAD
 		const { id } = req.params,
       { filename } = req.file
       
@@ -336,6 +345,13 @@ exports.update_thumbnail = (req, res) => {
         .where({ id })
         .update({ thumbnail: filename })
         .then(() => {
+=======
+		const { id: _id } = req.params,
+			{ filename } = req.file
+
+			Brand.updateOne({ _id }, { thumbnail: filename })
+				.then(() => {
+>>>>>>> mongodb
 					res.status(200).json({ ok: true })
 				})
 				.catch(() => {
