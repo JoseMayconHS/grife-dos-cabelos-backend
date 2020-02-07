@@ -1,27 +1,49 @@
 const bcryptjs = require('bcryptjs'),
-  Adm = require('../../../data/Schemas/Adm'),
-  Brand = require('../../../data/Schemas/Brand'),
-  Product = require('../../../data/Schemas/Product'),
-  Type = require('../../../data/Schemas/Type'),
-  User = require('../../../data/Schemas/User'),
   functions = require('../../../functions')
 
 exports.cards = (req, res)   => {
   try {
 
-    Brand.countDocuments((err1, brands) => {
-      Type.countDocuments((err2, types) => {
-        User.countDocuments((err3, clients) => {
-          Product.countDocuments((err4, products) => {
-            res.status(200).json({ ok: true, data: { 
-              brands: typeof +brands === 'number' ? +brands : 'falhou ❌',
-              types: typeof +types === 'number' ? +types : 'falhou ❌',
-              clients: typeof +clients === 'number' ? +clients : 'falhou ❌',
-              products: typeof +products === 'number' ? +products : 'falhou ❌',
-             }})
-          })
+    const getCount = (table, cb) => {
+      req.db(table)
+        .count('id')
+        .first()
+        .then(count => {
+
+          count = +Object.values(count)[0]
+      
+          cb(count)
+
         })
-      })
+        .catch(ee => {
+          cb('falhou ❌')
+        })
+    }
+
+    const fields = ['brand', 'type', 'user', 'product']
+
+    const middle = []
+
+    for (let fn = 0; fn <= 3; fn++) {
+      middle[fn] = function(next) {
+        getCount(fields[fn], value => {
+          fields[fn] = value
+
+          next && next()
+        })
+
+      }
+    }
+
+    functions.middleware(...middle, () => {
+      const data = { 
+        brands: fields[0],
+        types: fields[1],
+        clients: fields[2],
+        products: fields[3]
+      }
+
+      res.status(200).json({ ok: true, data })
     })
 
   }catch(e) {
@@ -36,91 +58,84 @@ exports.store = (req, res) => {
     let { password } = req.body
 
     const alReadyAccount = cb => {
-      Adm.countDocuments((err, count) => {
-        try {
-          if (err)
-            return res.status(500).send()
+      req.db('adm')
+        .count('id')
+        .first()
+        .then((count) => {
+          try {
+            if (+Object.values(count)[0]) 
+              throw 'Não pode criar mais de uma conta! ⚠️'
 
-          if (count)
-            throw 'Não pode criar mais de uma conta! ⚠️'
-  
-          cb()
-  
-        } catch(message) {
-          res.status(200).json({ ok: false, message, already: true })
-        }
-  
-      })
+            cb()
+
+          } catch(message) {
+            res.status(200).json({ ok: false, message: typeof message === 'string' ? message : 'Ocorreu um erro', already: true })
+          }
+
+        })
+        .catch(() => {
+          res.status(500).send()
+        })
     }
 
     const create = () => {
-      Adm.findOne({ username: username.trim() })
+      req.db('adm')
+        .where({ username: username.trim().toLowerCase() })
+        .select('id')
+        .first()
         .then(admByUsername => {
-          
-          if (!admByUsername) {
 
-            Adm.findOne({ email: email.trim().toLowerCase() })
+          if (admByUsername) {
+            res.status(200).json({ ok: false, message: 'Nome já existe 🤪', already: true })
+          } else {
+
+            req.db('adm')
+              .where({ email: email.trim().toLowerCase() })
+              .select('id')
+              .first()
               .then(admByEmail => {
 
-                if (!admByEmail) {
+                if (admByEmail) {
+                  res.status(200).json({ ok: false, message: 'Email já existe 🤪', already: true })
+                } else {
 
                   password = functions.criptor(password.trim().toLowerCase())
 
-                  Adm.create({ username: username.trim(), email: email.trim().toLowerCase(), password })
-                    .then(({ _doc: data }) => {
+                  req.db('adm')
+                    .insert({ username: username.trim(), email: email.trim().toLowerCase(), password })
+                    .then(() => {
 
-                      Type.create({
-                        name: 'Combo',
-                        insired,
-                        swiper: true
-                      })
-                      .then(() => {})
-                      .catch(() => {})
-                      .finally(() => {
+                      req.db('type')
+                        .insert({ name: 'Combo', insired, swiper: true })
+                        .then(() => {})
+                        .catch(() => {})
+                        .finally(() => { 
 
-                        if (autoLogin) {
+                          res.status(201).json({ ok: true })
 
-                          functions.token(data)
-                            .then(token => {
-                              res.status(201).json({ ok: true, data: { ...data, password: undefined, token: `Bearer ${token}` } })
-                            })
-                            .catch(() => {
-                              res.status(201).json({ ok: true, data: { ...data, password: undefined } })
-                            })
-  
-                        } else {
-                          res.status(201).json({ ok: true, data: { ...data, password: undefined } })
-                        }
-
-                      })
+                        })
 
                     })
                     .catch(_ => {
                       res.status(200).json({ ok: false, message: 'Não criado 😢' })
                     })
 
-                } else {
-                  res.status(200).json({ ok: false, message: 'Email já existe 🤪', already: true })
                 }
 
               })
-              .catch(err => {
-                res.status(500).send(err)    
+              .catch(() => {
+                res.status(500).send()  
               })
-
-          } else {
-
-            res.status(200).json({ ok: false, message: 'Nome já existe 🤪', already: true })
 
           }
 
         })
-        .catch(err => {
-          res.status(500).send(err)    
+        .catch(() => {
+          res.status(500).send()  
         })
     }
 
-    alReadyAccount(create)
+    alReadyAccount(() => create())
 
   } catch(err) {
     res.status(500).send(err)
@@ -132,10 +147,11 @@ exports.sign = (req, res) => {
 
     const { email, password } = req.body
 
-    Adm.findOne({ email: email.trim() })
+    req.db('adm')
+      .where({ email: email.trim() })
+      .first()
       .then(adm => {
         try {
-
           if (!adm) {
             throw 'Email não existe 🙄'
           }
@@ -144,9 +160,9 @@ exports.sign = (req, res) => {
             throw 'Senha inválida 🙄'
           }
 
-          functions.token({ adm: adm._doc.adm, value: adm._doc._id })
+          functions.token({ adm: adm.adm, value: adm.id })
             .then(token => {
-              res.status(200).json({ ok: true, data: { ...adm._doc, password: undefined, token: `Bearer ${token}` } })
+              res.status(200).json({ ok: true, data: { ...adm, password: undefined, token: `Bearer ${token}` } })
             })
             .catch(() => {
               res.status(200).json({ ok: false, message: 'Erro ao gerar token 💥' })
@@ -169,14 +185,16 @@ exports.sign = (req, res) => {
 exports.reconnect = (req, res) => {
   try {
 
-    if (!req._id)
+    if (!req.id)
       throw new Error()
 
-    Adm.findById(req._id)  
+    req.db('adm')
+      .where({ id: req.id })
+      .first()
       .then(adm => {
-        functions.token({ adm: adm._doc.adm, value: adm._doc._id })
+        functions.token({ adm: adm.adm, value: adm.id })
           .then(token => {
-            res.status(200).json({ ok: true, data: { ...adm._doc, password: undefined, token: `Bearer ${token}` } })
+            res.status(200).json({ ok: true, data: { ...adm, password: undefined, token: `Bearer ${token}` } })
           })
           .catch(() => {
             res.status(200).json({ ok: false, message: 'Erro ao gerar token 💥' })
@@ -194,10 +212,13 @@ exports.reconnect = (req, res) => {
 exports.formSelects = (req, res) => {
   try {
 
-    Type.find({}, 'name')
+
+    req.db('type')
+      .select('id', 'name')
       .then(typesDocument => {
 
-        Brand.find({}, 'title')
+        req.db('brand')
+          .select('id', 'title')
           .then(brandsDocument => {
 
             res.status(200).json({ 
@@ -214,6 +235,7 @@ exports.formSelects = (req, res) => {
       .catch(() => {
         res.status(200).json({ ok: false, message: 'Erro ao buscar tipos disponíveis' })
       })
+
 
   } catch(e) {
     res.status(500).send()

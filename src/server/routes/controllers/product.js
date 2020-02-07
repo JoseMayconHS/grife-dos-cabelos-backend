@@ -8,26 +8,40 @@ const Product = require('../../../data/Schemas/Product'),
 exports.indexAll = (req, res) => {
 	try {
 
-		const where = req.adm ? {} : { type: { $ne: 'combo' } }
+		const whereNot = req.adm ? {} : { type: 'Combo' }
 
-		Product.countDocuments(where, (err, count) => {
-			if (err) {
-				res.status(500).send()
-			} else {
-				const { page = 1 } = req.params
+		req.db('product')
+			.count('id')
+			.whereNot(whereNot)
+			.first()
+			.then(count => {
+				count = +Object.values(count)[0]
 
-				Product.find(where)
+				const { page } = req.params
+
+				req.db('product')
+					.whereNot(whereNot)
 					.limit(limit)
-					.skip((limit * page) - limit)
-					.sort('-createdAt')
-					.then(Documents => {
-						res.status(200).json({ ok: true, data: Documents, limit, count })
+					.offset(page * limit - limit)
+					.orderBy('id', 'desc')
+					.then(products => {
+
+						products = products.map(product => ({
+							...product,
+							price: JSON.parse(product.price),
+							item_included: JSON.parse(product.item_included)
+						}))
+
+						res.status(200).json({ ok: true, data: products, limit, count })
 					})
 					.catch(_ => {
 						res.status(500).send()
 					})
-			}
-		})
+
+			})
+			.catch(_ => {
+				res.status(500).send()
+			})
 
 	} catch(error) {
 		res.status(500).send()
@@ -37,27 +51,28 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
-		// Product.find()
-		// 	.then(Documents => {
-		// 		res.status(200).json({ ok: true, data: Documents })
-		// 	})
-		// 	.catch(err => {
-		// 		res.status(500).send()
-		// 	})
-
-		Type.findOne({ swiper: true }, '_id')
+		req.db('type')
+			.where({ swiper: true })
+			.select('id')
+			.first()
 			.then(typeSwiper => {
-				Product.find({ type_id: typeSwiper._id })
-					.then(Documents => {
-						res.status(200).json({ ok: true, data: Documents })
+
+				req.db('product')
+					.where({ type_id: typeSwiper.id })
+					.limit(10)
+					.orderBy('id', 'desc')
+					.then(productsCombos => {
+						res.status(200).json({ ok: true, data: productsCombos })
 					})
 					.catch(err => {
 						res.status(500).send()
 					})
+
 			})
 			.catch(err => {
 				res.status(500).send()
 			})
+
 	} catch(err) {
 		res.status(500).send(err)
 	}
@@ -66,12 +81,16 @@ exports.swiper = (req, res) => {
 exports.qtd = (req, res) => {
   try {
 
-      Product.countDocuments((err, count) => {
-        if (err) {
-          res.status(500).send(err)
-        } else {
-          res.status(200).json({ count })
-        }
+    req.db('product')
+      .count('id')
+      .first()
+      .then(count => {
+        count = +Object.values(count)[0]
+
+        res.status(200).json({ count })
+      })
+      .catch(() => {
+        res.status(500).send()
       })
     
   } catch(err) {
@@ -85,11 +104,14 @@ exports.store = (req, res) => {
 			thumbnail = req.file.filename
 
 		const delDocAndFile = id => {
-			Product.findByIdAndDelete(id)
-				.then(_ => {
+
+			req.db('product')
+				.where({ id })
+				.del()
+				.then(() => {
 					functions.delFolder(req, 'products')
 						.finally(() => {
-							res.status(200).json({ ok: false, message: 'Erro ao atualizar a marca' })
+							res.status(200).json({ ok: false, message: 'Erro ao criar produto' })
 						})
 				})
 				.catch(_ => {
@@ -98,6 +120,7 @@ exports.store = (req, res) => {
 							res.status(500).send()
 						})
 				})
+
 		}
 
 		let { item_included, price_from, price_to, promotion } = req.body
@@ -109,82 +132,96 @@ exports.store = (req, res) => {
 		price_to = +price_to
 		// promotion = promotion == '0' ? false : true (Ao criar, inicialmente não estará como promoção)
 
-		Brand.findById(brand_id)
+		const delFolder = fn => {
+			functions.delFolder(req, 'products')
+				.finally(() => {
+					fn()
+				})
+		}
+
+		req.db('brand')
+			.where({ id: brand_id })
+			.select('title', 'products')
+			.first()
 			.then(brand => {
 				if (brand) {
 
-					Type.findById(type_id)
-						.then(type => {
+					req.db('type')
+					.where({ id: type_id })
+					.select('name', 'products')
+					.first()
+					.then(type => {
+						if (type) {
 
-							if (type) {
-
-								const _document = {
-									title: title.trim(),
-									item_included, 
-									description: description.trim(),
-									brand: brand.title,
-									brand_id,
-									type: type.name,
-									type_id,
-									thumbnail,
-									price: {
-										// _from: price_from,
-										to: price_to
-									},
-									insired
-									// promotion
-								}
-					
-								Product.create(_document)
-									.then(product => {
-										Brand.updateOne({ _id: brand._id }, { products: brand.products + 1, insired })
-											.then(_ => {
-												Type.updateOne({ _id: type_id }, { products: type.products + 1, insired })
-													.then(_ => {
-														res.status(201).json({ ok: true, data: product._doc })
-													})
-													.catch(_ => {
-														delDocAndFile(product._doc._id)
-													})
-											})
-											.catch(_ => {
-												delDocAndFile(product._doc._id)
-											})
-									})
-									.catch(_ => {
-										functions.delFolder(req, 'products')
-											.finally(() => {
-												res.status(400).send()
-											})
-									})
-
-							} else {
-								functions.delFolder(req, 'products')
-									.finally(() => {
-										res.status(200).json({ ok: false, message: 'Tipo não encontrado' })
-									})
+							const _document = {
+								title: title.trim(),
+								item_included: JSON.stringify(item_included), 
+								description: description.trim(),
+								brand: brand.title,
+								brand_id,
+								type: type.name,
+								type_id,
+								thumbnail,
+								price: JSON.stringify({
+									// _from: price_from,
+									to: price_to
+								}),
+								insired
+								// promotion
 							}
 
-						})
-						.catch(() => {
-							functions.delFolder(req, 'products')
-								.finally(() => {
-									res.status(500).send()
+							req.db('product')
+								.insert(_document)
+								.then(result => {
+
+									req.db('brand')
+										.where({ id: brand_id })
+										.update({ products: brand.products + 1, insired })
+										.then(() => {
+											req.db('type')
+												.where({ id: type_id })
+												.update({ products: brand.products + 1, insired })
+												.then(() => {
+													res.status(201).json({ ok: true, data: { id: result[0] } })
+												})
+												.catch(_ => {
+													delDocAndFile(result[0])
+												})
+										})
+										.catch(_ => {
+											delDocAndFile(result[0])
+										})
+
 								})
+								.catch(() => {
+									delFolder(() => {
+										res.status(500).send()
+									})
+								})
+
+						} else {
+							delFolder(() => {
+								res.status(200).json({ ok: false, message: 'Tipo não encontrado' })
+							})
+						}
+					})
+					.catch(() => {
+						delFolder(() => {
+							res.status(500).send()
 						})
+					})
 		
+
 				} else {
-					functions.delFolder(req, 'products')
-						.finally(() => {
-							res.status(200).json({ ok: false, message: 'Marca não encontrada' })
-						})
+					delFolder(() => {
+						res.status(200).json({ ok: false, message: 'Marca não encontrada' })
+					})
 				}
 			})
-			.catch(_ => {
-				functions.delFolder(req, 'products')
-					.finally(() => {
-						res.status(500).send()
-					})
+			.catch(() => {
+				delFolder(() => {
+					res.status(500).send()
+				})
 			})
 
 	} catch(err) {
@@ -197,108 +234,143 @@ exports.store = (req, res) => {
 
 exports.update = (req, res) => {
 	try {
-		const { _id } = req.params,
+		const { id } = req.params,
 			document = req.body,
 			insired = req.body.insired
 
 		if (document.title) {
-			Product.findOne({ title: document.title })
+
+			req.db('product')
+				.where({ title: document.title })
+				.first()
 				.then(productExists => {
 					if (productExists) {
 						res.status(200).json({ ok: false, message: 'Nome já existe!' })
 					} else {
-						Product.updateOne({ _id }, document)
-							.then(rows => {
 
-								if (rows.nModified) {
-									res.status(200).json({ ok: true, message: 'Atualizado' })
-								} else {
-									res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-								}
+						req.db('product')
+							.where({ id })
+							.update(document)
+							.then((rows) => {
+
+								res.status(200).json({ ok: true, message: 'Atualizado' })
 
 							})
 							.catch(_ => {
 								res.status(500).send()
 							})
+
 					}
 				})
+				.catch(() => {
+					res.status(500).send()	
+				})
+
 		} else {
 
 			if (document.type_id || document.brand_id) {
 				const { type_id, brand_id } = document
 
-				Product.findById(_id)
+				req.db('product')
+					.where({ id })
+					.first()
 					.then(product => {
 
 						if (product) {
 							if (type_id) {
-					
-								Type.findById(product.type_id)
+
+								req.db('type')
+									.where({ id: product.type_id })
+									.select('id', 'products')
+									.first()
 									.then(beforeType => {
-										Type.updateOne({ _id: beforeType._id }, { products: beforeType.products - 1, insired })
+
+										req.db('type')
+											.where({ id: beforeType.id })
+											.update({ products: beforeType.products - 1, insired })
 											.then(() => {
-												Type.findById({ _id: type_id })
+
+												req.db('type')
+													.where({ id: type_id })
+													.first()
 													.then(actualType => {
-														Type.updateOne({ _id: type_id }, { products: actualType.products + 1, insired })
+
+														req.db('type')
+															.where({ id: type_id })
+															.update({ products: actualType.products + 1, insired })
 															.then(() => {
-																Product.updateOne({ _id }, document)
-																	.then(rows => {
 
-																		if (rows.nModified) {
-																			res.status(200).json({ ok: true, message: 'Atualizado' })
-																		} else {
-																			res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-																		}
-
+																req.db('product')
+																	.where({ id })
+																	.update(document)
+																	.then(() => {
+																		res.status(200).json({ ok: true, message: 'Atualizado' })
 																	})
 																	.catch(_ => {
 																		res.status(500).send()
 																	})
+																	
 															}).catch(() => {
 																res.status(500).send()	
 															})
+															
 													}).catch(() => {
 														res.status(500).send()	
 													})
+													
 											}).catch(() => {
 												res.status(500).send()	
 											})
+
 									}).catch(() => {
 										res.status(500).send()	
 									})
 
 							} else if (brand_id) {
 			
-								Brand.findById(product.brand_id)
+								req.db('brand')
+									.where({ id: product.brand_id })
+									.select('id', 'products')
+									.first()
 									.then(beforeBrand => {
-										Brand.updateOne({ _id: beforeBrand._id }, { products: beforeBrand.products - 1, insired })
+
+										req.db('brand')
+											.where({ id: beforeBrand.id })
+											.update({ products: beforeBrand.products - 1, insired })
 											.then(() => {
-												Brand.findById({ _id: brand_id })
+
+												req.db('brand')
+													.where({ id: brand_id })
+													.first()
 													.then(actualBrand => {
-														Brand.updateOne({ _id: brand_id }, { products: actualBrand.products + 1, insired })
+
+														req.db('brand')
+															.where({ id: brand_id })
+															.update({ products: actualBrand.products + 1, insired })
 															.then(() => {
-																Product.updateOne({ _id }, document)
-																	.then(rows => {
 
-																		if (rows.nModified) {
-																			res.status(200).json({ ok: true, message: 'Atualizado' })
-																		} else {
-																			res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-																		}
-
+																req.db('product')
+																	.where({ id })
+																	.update(document)
+																	.then(() => {
+																		res.status(200).json({ ok: true, message: 'Atualizado' })
 																	})
 																	.catch(_ => {
 																		res.status(500).send()
 																	})
+																	
 															}).catch(() => {
 																res.status(500).send()	
 															})
+															
 													}).catch(() => {
 														res.status(500).send()	
 													})
+													
 											}).catch(() => {
 												res.status(500).send()	
 											})
+
 									}).catch(() => {
 										res.status(500).send()	
 									})
@@ -314,23 +386,36 @@ exports.update = (req, res) => {
 						res.status(500).send()	
 					})
 
-			} else {
-				if (document.item_included) 
-				document.item_included = document.item_included.split(',')
+				
+			} else if (document.price) { 
 
-				Product.updateOne({ _id }, document)
-					.then(rows => {
+				const price = JSON.stringify(document.price)
 
-						if (rows.nModified) {
-							res.status(200).json({ ok: true, message: 'Atualizado' })
-						} else {
-							res.status(200).json({ ok: false, message: 'Nada foi alterado' })
-						}
-
+				req.db('product')
+					.where({ id })
+					.update({ price })
+					.then(() => {
+						res.status(200).json({ ok: true, message: 'Atualizado' })
 					})
 					.catch(_ => {
 						res.status(500).send()
 					})
+
+			} else {
+
+				if (document.item_included) 
+					document.item_included = JSON.stringify(document.item_included.split(','))
+
+				req.db('product')
+					.where({ id })
+					.update(document)
+					.then(() => {
+						res.status(200).json({ ok: true, message: 'Atualizado' })
+					})
+					.catch(_ => {
+						res.status(500).send()
+					})
+					
 			}
 		}
 
@@ -343,38 +428,58 @@ exports.indexBy = (req, res) => {
 	try {
 		let where = req.query || {}
 
-		if (where.promotion) where.promotion = +where.promotion > 0 ? true : false
+		if (where.promotion) where.promotion = +where.promotion
 
-		if (where.brand_id && !req.adm) where = { ...where, type: { $ne: 'Combo' } }
+		let whereNot = {}
+
+		if (where.brand_id && !req.adm) whereNot = { type: 'Combo' }
 
 		// if (where.brand_id)
 
 		const { page = 1 } = req.params
 
-		Product.countDocuments(where, (err, count) => {
-			if (err) {
-				res.status(500).send()
-			} else {
-				Product.find(where)
-					.limit(limit)
-					.skip((limit * page) - limit)
-					.sort('-createdAt')
-					.then(Documents => {
-						
-						const data = where._id ? Documents[0] : Documents
+		req.db('product')
+			.count('id')
+			.whereNot(whereNot)
+			.first()
+			.then(count => {
 
-						if (data) {
+				count = +Object.values(count)[0]
+
+				req.db('product')
+          .where(where)
+          .limit(limit)
+          .offset(page * limit - limit)
+					.orderBy('id', 'desc')
+					.whereNot(whereNot)
+          .then(products => {
+
+						const data = where.id ? products[0] : products
+
+            if (data) {
+              products = products.map(product => ({
+								...product,
+								price: JSON.parse(product.price),
+								item_included: JSON.parse(product.item_included)
+							}))
+	
+							const data = where.id ? products[0] : products
+	
 							res.status(200).json({ ok: true, data, limit, count })
-						} else {
-							res.status(400).send()
-						}
+            } else {
+              res.status(400).send()
+            }
 
-					})
-					.catch(_ => {
-						res.status(500).send()
-					})
-			}
-		})			
+          })
+          .catch(err => {
+            res.status(500).send()
+          })
+
+			})
+			.catch(_ => {
+        res.status(500).send()
+      })
+	
 	} catch(error) {
 		res.status(500).send()
 	}
@@ -383,46 +488,79 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { _id } = req.params = req.body.insired
+		const { id } = req.params
+		const insired = req.body.insired
 
-		Product.findById(_id)
+		req.db('product')
+			.where({ id })
+			.select('type_id', 'brand_id')
+			.first()
 			.then(product => {
-				Brand.findById(product.brand_id, 'products')
-					.then(brand => {
-						Brand.updateOne({ _id: product.brand_id }, { products: brand.products - 1 })
-							.then(() => {
-								Type.findById(product.type_id)
-									.then(type => {
-										Type.updateOne({ _id: product.type_id }, { products: type.products - 1 })
-											.then(() => {
-												functions.delFolder(null, 'products', product.thumbnail)
-													.finally(() => {
-														Product.deleteOne({ _id })
-															.then(_ => {
-																res.status(200).json({ ok: true })
-															})
-															.catch(_ => {
-																res.status(500).send()
-															})
-													})
-											}).catch(() => {
-												res.status(500).send()
-											})
-									}).catch(() => {
-										res.status(500).send()
-									})
-								
-							}).catch(() => {
-								res.status(500).send()
-							})
-					}).catch(() => {
-						res.status(500).send()
-					})
 
+				const updateBrand = (next) => {
+					req.db('brand')
+						.where({ id: product.brand_id })
+						.select('products')
+						.first()
+						.then(brand => {
+
+							req.db('brand')
+								.where({ id: product.brand_id })
+								.update({ products: brand.products - 1 })
+								.then(() => {
+
+									typeof next === 'function' && next()
+									
+								}).catch(() => {
+									res.status(500).send()
+								})
+								
+						}).catch(() => {
+							res.status(500).send()
+						})
+				}
+
+				const updateType = (next) => {
+					req.db('type')
+						.where({ id: product.type_id })
+						.select('products')
+						.first()
+						.then(type => {
+
+							req.db('type')
+								.where({ id: product.type_id })
+								.update({ products: type.products - 1 })
+								.then(() => {
+
+									typeof next === 'function' && next()
+									
+								}).catch(() => {
+									res.status(500).send()
+								})
+								
+						}).catch(() => {
+							res.status(500).send()
+						})
+				}
+
+				const delProduct = () => {
+					req.db('product')
+						.where({ id })
+						.del()
+						.then(() => {
+							res.status(200).json({ ok: true, message: 'apagado com sucesso' })
+						})
+						.catch(() => {
+							res.status(500).send()
+						})
+				}
+
+				functions.middleware(updateBrand, updateType, delProduct)
+					
 			})
 			.catch(() => {
 				res.status(500).send()
-			})
+			})			
 			
 	} catch(e) {
 		res.status(500).send()
@@ -452,17 +590,20 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
 	try {
 
-		const { _id } = req.params,
+		const { id } = req.params,
 			{ filename } = req.file,
 			{ insired } = req.body
 
-			Product.updateOne({ _id }, { thumbnail: filename, insired })
+			req.db('product')
+				.where({ id })
+				.update({ thumbnail: filename, insired })
 				.then(() => {
 					res.status(200).json({ ok: true })
 				})
 				.catch(() => {
 					res.status(200).json({ ok: false, message: 'Erro ao atualizar dado' })
 				})
+				
 	} catch(e) {
 		res.status(500).send()
 	}

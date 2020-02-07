@@ -26,7 +26,5 @@ route
 	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
 	.post('/admin/dashboard/type', typeControllers.store)
 	.post('/admin/dashboard/expo', pushNotificationControllers.send)
-	
-	// .post('/app/user/buy', userControllers.buy)
 
 module.exports = app => app.use(route)

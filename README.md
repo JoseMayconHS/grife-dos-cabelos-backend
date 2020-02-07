@@ -4,8 +4,8 @@ API para auxiliar no desenvolvimento do aplicativo.
 ## App
  - [Projeto](https://github.com/Maycon-PE/grife-dos-cabelos-App "Ir ao repositório")
 
- ## Dashboard 
-  - [Projeto](https://github.com/Maycon-PE/grife-dos-cabelos-Dash  "Ir ao repositório")
+## Dashboard 
+ - [Projeto](https://github.com/Maycon-PE/grife-dos-cabelos-Dash  "Ir ao repositório")
 
 ## Endpointers
 
@@ -37,15 +37,15 @@ API para auxiliar no desenvolvimento do aplicativo.
 	- `/admin/dashboard/form` : Busca marcas e tipos para o formulário.
 - PUT
 	- `/private/app/user` : Atualiza um usuário;
-	- `/admin/dashboard/product/:_id` : Atualiza um produto;	
-	- `/admin/dashboard/brand/:_id` : Atualiza uma marca;
-	- `/admin/dashboard/type/:_id` : Atualiza um tipo;
-	- `/admin/dashboard/product/thumbnail/:_id` : Atualiza a imagem do produto;
-	- `/admin/dashboard/brand/thumbnail/:_id` : Atualiza a imagem da marca.
+	- `/admin/dashboard/product/:id` : Atualiza um produto;	
+	- `/admin/dashboard/brand/:id` : Atualiza uma marca;
+	- `/admin/dashboard/type/:id` : Atualiza um tipo;
+	- `/admin/dashboard/product/thumbnail/:id` : Atualiza a imagem do produto;
+	- `/admin/dashboard/brand/thumbnail/:id` : Atualiza a imagem da marca.
 - DELETE
-	- `/admin/dashboard/brand/:_id` : Delete uma marca;
-	- `/admin/dashboard/product/:_id` : Deleta um produto;
-	- `/admin/dashboard/user/:_id` : Deleta um cliente;
+	- `/admin/dashboard/brand/:id` : Delete uma marca;
+	- `/admin/dashboard/product/:id` : Deleta um produto;
+	- `/admin/dashboard/user/:id` : Deleta um cliente;
 	- `/admin/dashboard/notification/:index` : Deleta uma notificação das recentes;
-	- `/admin/dashboard/type/:_id` : Deleta um tipo.
+	- `/admin/dashboard/type/:id` : Deleta um tipo.
 

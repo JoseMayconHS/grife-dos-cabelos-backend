@@ -9,14 +9,14 @@ const route = require('express').Router(),
 	putBrand = multer({ storage: updateBrandThumbnail, fileFilter })
 
 route
-	.put('/app/user/changepassword/:_id', userControllers.changepassword)
+	.put('/app/user/changepassword/:id', userControllers.changepassword)
 	// App
 	.put('/private/app/user', userControllers.update)
 	// Dashboard
-	.put('/admin/dashboard/product/:_id', productControllers.update)
-	.put('/admin/dashboard/brand/:_id', brandControllers.update)
-	.put('/admin/dashboard/type/:_id', typeControllers.update)
-	.put('/admin/dashboard/product/thumbnail/:_id', putProduct.single('thumbnail'), productControllers.update_thumbnail)
-	.put('/admin/dashboard/brand/thumbnail/:_id', putBrand.single('thumbnail'), brandControllers.update_thumbnail)
+	.put('/admin/dashboard/product/:id', productControllers.update)
+	.put('/admin/dashboard/brand/:id', brandControllers.update)
+	.put('/admin/dashboard/type/:id', typeControllers.update)
+	.put('/admin/dashboard/product/thumbnail/:id', putProduct.single('thumbnail'), productControllers.update_thumbnail)
+	.put('/admin/dashboard/brand/thumbnail/:id', putBrand.single('thumbnail'), brandControllers.update_thumbnail)
 
 module.exports = app => app.use(route)
