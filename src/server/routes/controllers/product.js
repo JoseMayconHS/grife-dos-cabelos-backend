@@ -51,10 +51,16 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
-		req.db('type')
-			.where({ swiper: true })
-			.select('id')
-			.first()
+		// Product.find()
+		// 	.then(Documents => {
+		// 		res.status(200).json({ ok: true, data: Documents })
+		// 	})
+		// 	.catch(err => {
+		// 		res.status(500).send()
+		// 	})
+		
+
+		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 
 				req.db('product')
@@ -234,11 +240,7 @@ exports.store = (req, res) => {
 
 exports.update = (req, res) => {
 	try {
-<<<<<<< HEAD
-		const { id } = req.params,
-=======
 		const { id: _id } = req.params,
->>>>>>> mongodb
 			document = req.body,
 			insired = req.body.insired
 
@@ -492,12 +494,7 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-<<<<<<< HEAD
-		const { id } = req.params
-		const insired = req.body.insired
-=======
 		const { id: _id } = req.params = req.body.insired
->>>>>>> mongodb
 
 		req.db('product')
 			.where({ id })
@@ -598,11 +595,7 @@ exports.search = (req, res) => {
 exports.update_thumbnail = (req, res) => {
 	try {
 
-<<<<<<< HEAD
-		const { id } = req.params,
-=======
 		const { id: _id } = req.params,
->>>>>>> mongodb
 			{ filename } = req.file,
 			{ insired } = req.body
 
