@@ -7,10 +7,10 @@ const route = require('express').Router(),
 
 route
   // Dashboard
-  .delete('/admin/dashboard/brand/:_id', brandControllers.remove)
-  .delete('/admin/dashboard/product/:_id', productControllers.remove)
-  .delete('/admin/dashboard/user/:_id', userControllers.remove)
+  .delete('/admin/dashboard/brand/:id', brandControllers.remove)
+  .delete('/admin/dashboard/product/:id', productControllers.remove)
+  .delete('/admin/dashboard/user/:id', userControllers.remove)
   .delete('/admin/dashboard/notification/:index', pushNotificationControllers.remove)
-  .delete('/admin/dashboard/type/:_id', typeControllers.remove)
+  .delete('/admin/dashboard/type/:id', typeControllers.remove)
 
 module.exports = app => app.use(route)

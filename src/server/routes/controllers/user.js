@@ -25,7 +25,7 @@ exports.buy = (req, res) => {
 
 exports.changepassword = (req, res) => {
   try {
-    const { _id } = req.params
+    const { id: _id } = req.params
     let { password } = req.body
 
     password = functions.criptor(password)
@@ -260,7 +260,7 @@ exports.sign = (req, res) => {
 exports.remove = (req, res) => {
   try {
 
-    const { _id } = req.params
+    const { id: _id } = req.params
 
     User.deleteOne({ _id })
       .then(() => {

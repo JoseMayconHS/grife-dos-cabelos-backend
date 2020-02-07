@@ -107,7 +107,7 @@ exports.indexBy = (req, res) => {
 exports.update = (req, res) => {
   try {
 
-    const { _id } = req.params
+    const { id :_id } = req.params
 
     if (req.body.name) {
 
@@ -151,7 +151,7 @@ exports.update = (req, res) => {
 exports.remove = (req, res) => {
   try {
 
-    const { _id } = req.params
+    const { id: _id } = req.params
 
     if (typeof _id !== 'string')
       throw new Error()
