@@ -235,6 +235,9 @@ exports.sign = (req, res) => {
             throw 'Senha inválida'
           }
 
+          if (!user.status)
+            throw 'Seu cadastro ainda está pendente! ⏳'
+
           functions.token(user._doc._id)
             .then(token => {
               res.status(200).json({ ok: true, data: { ...user._doc, password: undefined }, token: `Bearer ${token}` })
