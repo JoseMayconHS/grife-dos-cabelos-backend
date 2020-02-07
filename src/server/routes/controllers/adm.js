@@ -71,7 +71,8 @@ exports.store = (req, res) => {
 
                       Type.create({
                         name: 'Combo',
-                        insired
+                        insired,
+                        swiper: true
                       })
                       .then(() => {})
                       .catch(() => {})

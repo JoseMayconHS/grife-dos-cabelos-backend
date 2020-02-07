@@ -4,7 +4,7 @@ const bcryptjs = require('bcryptjs'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
   generatePassword = require('generate-password'),
-  limit = process.env.LIMIT_PAGINATION || 10
+  limit = +process.env.LIMIT_PAGINATION || 10
 
 exports.buy = (req, res) => {
 
@@ -224,11 +224,11 @@ exports.sign = (req, res) => {
 
     const { cellphone, password } = req.body
 
-    User.findOne({ cellphone })
+    User.findOne({ cellphone: cellphone.trim() })
       .then(user => {
         try {
           if (!user) {
-           throw 'Usuário não existe'
+           throw 'Ninguém com este telefone'
           } 
 
           if (!bcryptjs.compareSync(password.trim().toLowerCase(), user._doc.password)) {

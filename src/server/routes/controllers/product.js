@@ -2,8 +2,7 @@ const Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = process.env.LIMIT_PAGINATION || 10,
-	limit_swiper = process.env.SWIPER_LIMIT || 7
+	limit = +process.env.LIMIT_PAGINATION || 10
 
 
 exports.indexAll = (req, res) => {
@@ -38,21 +37,26 @@ exports.indexAll = (req, res) => {
 exports.swiper = (req, res) => {
 	try {
 
+		// Product.find()
+		// 	.then(Documents => {
+		// 		res.status(200).json({ ok: true, data: Documents })
+		// 	})
+		// 	.catch(err => {
+		// 		res.status(500).send()
+		// 	})
+
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id })
-					// .limit(limit_swiper)
-					// .skip((limit_swiper * page) - limit_swiper)
-					// .sort('-createdAt')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
 					.catch(err => {
-						res.status(500).json({ ok: false })
+						res.status(500).send()
 					})
 			})
 			.catch(err => {
-				res.status(500).json({ ok: false })
+				res.status(500).send()
 			})
 	} catch(err) {
 		res.status(500).send(err)
@@ -379,7 +383,7 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { _id } = req.paramsinsired = req.body.insired
+		const { _id } = req.params = req.body.insired
 
 		Product.findById(_id)
 			.then(product => {

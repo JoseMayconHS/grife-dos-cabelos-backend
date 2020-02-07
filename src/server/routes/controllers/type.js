@@ -2,7 +2,7 @@ const Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   Brand = require('../../../data/Schemas/Brand'),
   functions =  require('../../../functions'),
-  limit = process.env.LIMIT_PAGINATION || 10
+  limit = +process.env.LIMIT_PAGINATION || 10
 
 exports.store = (req, res) => {
   try {
@@ -20,7 +20,6 @@ exports.store = (req, res) => {
               res.status(201).json({ ok: true, data: created })
             })
             .catch((er) => {
-              console.log({ er })
               res.status(500).send()    
             })
 
@@ -28,12 +27,10 @@ exports.store = (req, res) => {
          
       })
       .catch((e) => {
-        console.log({ e })
         res.status(500).send()    
       })
 
   } catch(err) {
-    console.log({ err })
     res.status(500).send()
   }
 }
@@ -159,85 +156,77 @@ exports.remove = (req, res) => {
     if (typeof _id !== 'string')
       throw new Error()
 
+    Type.findById(_id, 'swiper')
+      .then(type => {
+        if (type.swiper) {
+          res.status(200).json({ ok: false, message: 'Esse tipo não pode ser apagado ⚠️' })  
+        } else {
 
-    Product.find({ type_id: _id })
-      .then(list => {
-        if (list && list.forEach) {
-          let error = false
+          Product.find({ type_id: _id })
+            .then(list => {
+              if (list && list.forEach) {
+                let error = false
 
-          const forEachToFunctions = list.map(({ thumbnail }) => {
-            return function(next) {
-              functions.delFolder(req, 'products', thumbnail)
-                .then(() => {
-                  next && next()
-                })
-                .catch(() => {
-                  error = true
-                  next && next()
-                })
-            }
-          })
-
-          // const recalcTypeProducts = list.map(({ type_id }) => {
-          //   return function(next) {
-          //     Type.findById(type_id)
-          //       .then(type => {
-          //         Type.updateOne({ _id: type_id }, { products: type.products - 1 })
-          //           .then(() => {
-          //             next && next()
-          //           })
-          //           .catch(() => {
-          //             error = true
-          //             next && next()
-          //           })
-          //       }).catch(_ => {
-          //         error = true
-          //         next && next()
-          //       })
-          //   }
-          // })
-
-          const recalcBrandProducts = list.map(({ brand_id }) => {
-            return function(next) {
-              Brand.findById(brand_id)
-                .then(brand => {
-                  Brand.updateOne({ _id: brand_id }, { products: brand.products - 1 })
-                    .then(() => {
-                      next && next()
-                    })
-                    .catch(() => {
-                      error = true
-                      next && next()
-                    })
-                }).catch(_ => {
-                  error = true
-                  next && next()
-                })
-            }
-          })
-
-          const delDocuments = () => {
-            Product.deleteMany({ type_id: _id })
-              .then(_ => {
-
-                Type.deleteOne({ _id }, (err) => {
-                  if (err) {
-                    res.status(500).send(err)
-                  } else {
-            
-                    res.status(200).json({ ok: true, message: error ? 'Ocorreu alguns erros' : 'apagado com sucesso' })
-            
+                const forEachToFunctions = list.map(({ thumbnail }) => {
+                  return function(next) {
+                    functions.delFolder(req, 'products', thumbnail)
+                      .then(() => {
+                        next && next()
+                      })
+                      .catch(() => {
+                        error = true
+                        next && next()
+                      })
                   }
                 })
-              })
-              .catch(_ => {
-                res.sttaus(500).send()
-              })
-          }
 
-          functions.middleware(...forEachToFunctions, ...recalcBrandProducts, delDocuments)
-        } else {
-          res.status(500).send()
+                const recalcBrandProducts = list.map(({ brand_id }) => {
+                  return function(next) {
+                    Brand.findById(brand_id)
+                      .then(brand => {
+                        Brand.updateOne({ _id: brand_id }, { products: brand.products - 1 })
+                          .then(() => {
+                            next && next()
+                          })
+                          .catch(() => {
+                            error = true
+                            next && next()
+                          })
+                      }).catch(_ => {
+                        error = true
+                        next && next()
+                      })
+                  }
+                })
+
+                const delDocuments = () => {
+                  Product.deleteMany({ type_id: _id })
+                    .then(_ => {
+
+                      Type.deleteOne({ _id }, (err) => {
+                        if (err) {
+                          res.status(500).send(err)
+                        } else {
+                  
+                          res.status(200).json({ ok: true, message: error ? 'Ocorreu alguns erros' : 'apagado com sucesso' })
+                  
+                        }
+                      })
+                    })
+                    .catch(_ => {
+                      res.sttaus(500).send()
+                    })
+                }
+
+                functions.middleware(...forEachToFunctions, ...recalcBrandProducts, delDocuments)
+              } else {
+                res.status(500).send()
+              }
+            })
+            .catch(_ => {
+              res.status(500).send()
+            })
+
         }
       })
       .catch(_ => {
