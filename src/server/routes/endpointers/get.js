@@ -26,6 +26,7 @@ route
 	// Usuário
 	.get('/admin/dashboard/user/:page', userControllers.indexAll)	
 	.get('/admin/dashboard/user/search/:word/:page', userControllers.search)
+	// .get('/admin/dashboard/search/:collection/:term', admControllers.search)
 	// Quantidade
 	.get('/admin/dashboard/qtd/user', userControllers.qtd)
 	.get('/admin/dashboard/qtd/product', productControllers.qtd)

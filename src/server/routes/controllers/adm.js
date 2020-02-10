@@ -29,6 +29,96 @@ exports.cards = (req, res)   => {
   }
 }
 
+exports.toggleUserSignUp = (req, res) => {
+  try {
+
+    const { id: _id } = req.params
+
+    const { status } = req.body
+
+    User.updateOne({ _id }, { status })
+      .then(() => {
+        res.status(200).send()
+      })
+      .catch(() => {
+        res.status(500).send()
+      })
+
+  } catch(err) {
+    res.status(500).send()
+  }
+}
+
+exports.toggleProductStatus = (req, res) => {
+  try {
+
+    const { id: _id } = req.params
+
+    const { status } = req.body
+
+    Product.updateOne({ _id }, { status })
+      .then(() => {
+        res.status(200).send()
+      })
+      .catch(() => {
+        res.status(500).send()
+      })
+
+  } catch(err) {
+    res.status(500).send()
+  }
+}
+
+
+
+exports.removeUser = (req, res) => {
+  try {
+
+    const { id: _id } = req.params
+
+    User.deleteOne({ _id })
+      .then(() => {
+        res.status(200).send()
+      })
+      .catch(() => {
+        res.status(500).send()
+      })
+
+  } catch (err) {
+    res.status(500).send()
+  }
+}
+
+// exports.search = (req, res) => {
+//   try {
+
+//     const { collection, term } = req.params
+
+//     console.log(req.params)
+
+//     switch(collection) {
+//       case 'user':
+
+//         User.countDocuments({ username: term }, (err, count) => {
+//           if (err) {
+//             console.log({ err })
+//             return res.status(500).send() 
+//           }
+
+//           User.find({ username: term })
+
+//           res.status(200).json({ ok: true, count })
+
+//         })
+
+//         break;
+//     }
+
+//   } catch(e) {
+//     res.status(500).send()
+//   }
+// }
+
 exports.store = (req, res) => {
   try {
 

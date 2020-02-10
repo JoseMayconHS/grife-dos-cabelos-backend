@@ -56,7 +56,7 @@ exports.indexAll = (req, res) => {
           Type.find()
             .limit(limit)
             .skip((limit * page) - limit)
-            .sort('-createdAt')
+            .sort('-created_at')
             .then(Documents => {
               res.status(200).json({ ok: true, data:  Documents, limit, count })
             })
@@ -87,7 +87,7 @@ exports.indexBy = (req, res) => {
         Type.find(where)
           .limit(limit)
           .skip((limit * page) - limit)
-          .sort('-createdAt')
+          .sort('-created_at')
           .then(Documents => {
             res.status(200).json({ ok: true, data: where._id ? Documents[0] : Documents, limit, count })
           })

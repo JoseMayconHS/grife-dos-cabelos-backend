@@ -16,7 +16,7 @@ exports.indexAll = (req, res) => {
         Brand.find()
           .limit(limit)
           .skip((limit * page) - limit)
-          .sort('-createdAt')
+          .sort('-created_at')
           .then(Documents => {
             res.status(200).json({ ok: true, data: Documents, limit, count })
           })
@@ -61,7 +61,7 @@ exports.indexBy = (req, res) => {
         Brand.find(where)
           .limit(limit)
           .skip((limit * page) - limit)
-          .sort('-createdAt')
+          .sort('-created_at')
           .then(Documents => {
 
             const data = where._id ? Documents[0] : Documents
@@ -88,8 +88,12 @@ exports.indexBy = (req, res) => {
 
 exports.store = (req, res) => {
   try {
+    console.log({ body: req.body, file: req.file })
+    
     const { title, insired } = req.body,
       thumbnail = req.file.filename
+
+      
 
     const _document = {
       title: title.trim(),
@@ -119,6 +123,7 @@ exports.store = (req, res) => {
       })
 
   } catch(err) {
+    console.log({ err })
     functions.delFolder(req, 'brands')
       .finally(() => {
         res.status(500).send()
@@ -272,7 +277,7 @@ exports.search = (req, res) => {
 		Brand.find()
 			.limit(limit)
 			.skip((limit * page) - limit)
-			.sort('-createdAt')
+			.sort('-created_at')
 			.then(all => all.filter(({ title }) => title.search(condition) >= 0 ))
 			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
 			.catch(err => res.status(400).send(err))

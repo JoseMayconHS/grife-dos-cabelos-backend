@@ -8,7 +8,7 @@ const Product = require('../../../data/Schemas/Product'),
 exports.indexAll = (req, res) => {
 	try {
 
-		const where = req.adm ? {} : { type: { $ne: 'combo' } }
+		const where = req.adm ? {} : { status: true }
 
 		Product.countDocuments(where, (err, count) => {
 			if (err) {
@@ -19,7 +19,7 @@ exports.indexAll = (req, res) => {
 				Product.find(where)
 					.limit(limit)
 					.skip((limit * page) - limit)
-					.sort('-createdAt')
+					.sort('-created_at')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents, limit, count })
 					})
@@ -36,19 +36,10 @@ exports.indexAll = (req, res) => {
 
 exports.swiper = (req, res) => {
 	try {
-
-		// Product.find()
-		// 	.then(Documents => {
-		// 		res.status(200).json({ ok: true, data: Documents })
-		// 	})
-		// 	.catch(err => {
-		// 		res.status(500).send()
-		// 	})
-		
-
+	
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
-				Product.find({ type_id: typeSwiper._id })
+				Product.find({ type_id: typeSwiper._id, status: true })
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
@@ -350,6 +341,8 @@ exports.indexBy = (req, res) => {
 
 		// if (where.brand_id)
 
+		if (!req.adm) where.status = true
+
 		const { page = 1 } = req.params
 
 		Product.countDocuments(where, (err, count) => {
@@ -359,7 +352,7 @@ exports.indexBy = (req, res) => {
 				Product.find(where)
 					.limit(limit)
 					.skip((limit * page) - limit)
-					.sort('-createdAt')
+					.sort('-created_at')
 					.then(Documents => {
 						
 						const data = where._id ? Documents[0] : Documents
@@ -384,7 +377,7 @@ exports.indexBy = (req, res) => {
 
 exports.remove = (req, res) => {
 	try {
-		const { id: _id } = req.params = req.body.insired
+		const { id: _id } = req.params
 
 		Product.findById(_id)
 			.then(product => {
@@ -437,10 +430,10 @@ exports.search = (req, res) => {
 
 		const condition = new RegExp(word.trim(), 'gi')
 
-		Product.find({ type: { $ne: 'combo' } })
+		Product.find({ status: true })
 			.limit(limit)
 			.skip((limit * page) - limit)
-			.sort('-createdAt')
+			.sort('-created_at')
 			.then(all => all.filter(({ title, type, brand }) => title.search(condition) >= 0 || brand.search(condition) >= 0 || type.search(condition) >= 0))
 			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
 			.catch(err => res.status(400).send(err))

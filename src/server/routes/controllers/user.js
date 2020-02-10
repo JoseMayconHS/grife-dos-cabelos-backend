@@ -1,27 +1,9 @@
 const bcryptjs = require('bcryptjs'),
-  pdf = require('html-pdf'),
-  pdfTemplates = require('../../../data/pdf'),
   functions = require('../../../functions'),
   User = require('../../../data/Schemas/User'),
   generatePassword = require('generate-password'),
   limit = +process.env.LIMIT_PAGINATION || 10
 
-exports.buy = (req, res) => {
-
-  // const html = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'data', 'pdf', 'template.html'), { encoding: 'utf8' })
-  const html = pdfTemplates.template(req.body)
-
-  pdf.create(html, { directory: './', format: 'A4', orientation: 'landscape' })
-    .toFile('output.pdf', (err, fileInfo) => {
-      if (err) 
-        return console.log(err)
-
-      console.log(fileInfo)  
-
-        res.status(200).sendFile(fileInfo.filename)
-    })
-
-} 
 
 exports.changepassword = (req, res) => {
   try {
@@ -67,7 +49,9 @@ exports.forgot = (req, res) => {
         if (user) {
 
           if (cellphone === user.cellphone) {
+
             res.status(200).json({ ok: true, data: user._id })  
+
           } else {
             res.status(200).json({ ok: false, message: 'Este telefone é diferente' })  
           }
@@ -80,6 +64,16 @@ exports.forgot = (req, res) => {
       })
 
   } catch(e) {
+    res.status(500).send()
+  }
+}
+
+exports.fallTwilio = (req, res) => {
+  try {
+    const twiml = new MessagingResponse();
+    twiml.message("Thanks for signing up!");
+    res.end(twiml.toString());
+  } catch(err) {
     res.status(500).send()
   }
 }
@@ -112,7 +106,7 @@ exports.indexAll = (req, res) => {
         User.find()
           .limit(limit)
           .skip((limit * page) - limit)
-          .sort('-createdAt')
+          .sort('-created_at')
           .then(Documents => {
             res.status(200).json({ ok: true, data: Documents, limit, count })
           })
@@ -288,7 +282,7 @@ exports.search = (req, res) => {
 		User.find()
 			.limit(limit)
 			.skip((limit * page) - limit)
-			.sort('-createdAt')
+			.sort('-created_at')
 			.then(all => all.filter(({ username }) => username.search(condition) >= 0))
 			.then(filtered => res.status(200).json({ ok: true, data: filtered, limit }))
 			.catch(err => res.status(400).send(err))
