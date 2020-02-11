@@ -41,7 +41,7 @@ exports.updateProductThumbnail = multer.diskStorage({
     cb(null, dirProduct)
   },
   filename: function(req, file, cb) {
-    const { _id } = req.params
+    const { id: _id } = req.params
 
     Product.findById({ _id }, 'thumbnail')
       .then(product => {
@@ -52,19 +52,26 @@ exports.updateProductThumbnail = multer.diskStorage({
 
         const n_ext = path.extname(file.originalname)
 
-        if (ext !== n_ext) {
-          dir = path.resolve(__dirname, '..', 'static', 'products', product.thumbnail)
-          try {
-            fs.unlinkSync(dir)
-          } catch(e) {
+        const dir = path.resolve(__dirname, '..', 'static', 'products', product.thumbnail)
+        try {
+          fs.unlinkSync(dir)
+        } catch(e) {
 
-          }
         }
 
-        const filename = path.parse(product.thumbnail).name
+        // if (ext !== n_ext) {
+        //   dir = path.resolve(__dirname, '..', 'static', 'products', product.thumbnail)
+          // try {
+          //   fs.unlinkSync(dir)
+          // } catch(e) {
+
+          // }
+        // }
+
+        // const filename = path.parse(product.thumbnail).name
 
         // cb(null, `product_${Date.now()}${n_ext}`)
-        cb(null, `${filename}${n_ext}`)  
+        cb(null, `product_${Date.now()}${n_ext}`)  
       })
       .catch((e) => {
         cb(e)
@@ -78,7 +85,7 @@ exports.updateBrandThumbnail = multer.diskStorage({
     cb(null, dirBrand)
   },
   filename: function(req, file, cb) {
-    const { _id } = req.params
+    const { id: _id } = req.params
 
     Brand.findById({ _id }, 'thumbnail')
       .then(brand => {
@@ -89,19 +96,27 @@ exports.updateBrandThumbnail = multer.diskStorage({
 
         const n_ext = path.extname(file.originalname)
 
-        if (ext !== n_ext) {
-          dir = path.resolve(__dirname, '..', 'static', 'brands', brand.thumbnail)
-          try {
-            fs.unlinkSync(dir)
-          } catch(e) {
+        const dir = path.resolve(__dirname, '..', 'static', 'brands', brand.thumbnail)
 
-          }
+        try {
+          fs.unlinkSync(dir)
+        } catch(e) {
+
         }
 
-        const filename = path.parse(brand.thumbnail).name
+        // if (ext !== n_ext) {
+        //   dir = path.resolve(__dirname, '..', 'static', 'brands', brand.thumbnail)
+        //   try {
+        //     fs.unlinkSync(dir)
+        //   } catch(e) {
+
+        //   }
+        // }
+
+        // const filename = path.parse(brand.thumbnail).name
 
         // cb(null, `brand_${Date.now()}${n_ext}`)
-        cb(null, `${filename}${n_ext}`)  
+        cb(null, `brand_${Date.now()}${ext}`)  
       })
       .catch((e) => {
         cb(e)

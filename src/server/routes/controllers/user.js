@@ -68,16 +68,6 @@ exports.forgot = (req, res) => {
   }
 }
 
-exports.fallTwilio = (req, res) => {
-  try {
-    const twiml = new MessagingResponse();
-    twiml.message("Thanks for signing up!");
-    res.end(twiml.toString());
-  } catch(err) {
-    res.status(500).send()
-  }
-}
-
 exports.qtd = (req, res) => {
   try {
 
@@ -230,7 +220,7 @@ exports.sign = (req, res) => {
           }
 
           if (!user.status)
-            throw 'Seu cadastro ainda está pendente! ⏳'
+            throw 'No momento, seu cadastro está desativado! ⏳'
 
           functions.token(user._doc._id)
             .then(token => {

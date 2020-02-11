@@ -73,7 +73,7 @@ exports.qtd = (req, res) => {
 
 exports.store = (req, res) => {
 	try {
-		const { title,  description, brand_id, type_id, insired } = req.body,
+		const { title,  description, brand_id, type_id } = req.body,
 			thumbnail = req.file.filename
 
 		const delDocAndFile = id => {
@@ -92,7 +92,7 @@ exports.store = (req, res) => {
 				})
 		}
 
-		let { item_included, price_from, price_to, promotion } = req.body
+		let { item_included, price_from, price_to, promotion, insired } = req.body
 
 		item_included = item_included
 			.split(',')
@@ -129,6 +129,8 @@ exports.store = (req, res) => {
 					
 								Product.create(_document)
 									.then(product => {
+										insired = insired.replace('Adicionado em', 'Atualizado em')
+
 										Brand.updateOne({ _id: brand._id }, { products: brand.products + 1, insired })
 											.then(_ => {
 												Type.updateOne({ _id: type_id }, { products: type.products + 1, insired })
@@ -190,8 +192,7 @@ exports.store = (req, res) => {
 exports.update = (req, res) => {
 	try {
 		const { id: _id } = req.params,
-			document = req.body,
-			insired = req.body.insired
+			document = req.body
 
 		if (document.title) {
 			Product.findOne({ title: document.title })
