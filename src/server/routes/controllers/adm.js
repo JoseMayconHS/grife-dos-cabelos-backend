@@ -89,35 +89,21 @@ exports.removeUser = (req, res) => {
   }
 }
 
-// exports.search = (req, res) => {
-//   try {
+exports.qtd = (req, res) => {
+  try {
 
-//     const { collection, term } = req.params
-
-//     console.log(req.params)
-
-//     switch(collection) {
-//       case 'user':
-
-//         User.countDocuments({ username: term }, (err, count) => {
-//           if (err) {
-//             console.log({ err })
-//             return res.status(500).send() 
-//           }
-
-//           User.find({ username: term })
-
-//           res.status(200).json({ ok: true, count })
-
-//         })
-
-//         break;
-//     }
-
-//   } catch(e) {
-//     res.status(500).send()
-//   }
-// }
+      Adm.countDocuments((err, count) => {
+        if (err) {
+          res.status(500).send(err)
+        } else {
+          res.status(200).json({ count })
+        }
+      })
+    
+  } catch(err) {
+    res.status(500).send(err)
+  }
+}
 
 exports.store = (req, res) => {
   try {

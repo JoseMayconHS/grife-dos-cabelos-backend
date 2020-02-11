@@ -8,6 +8,7 @@ const route = require('express').Router(),
 
 route
 	.get('/debug', (req, res) => res.send('<h1>Funcionando....1</h1>'))
+	.get('/already', admControllers.qtd)
 	// Ambos
 	// Marca
 	.get('/app/user/generate', userControllers.generate)
