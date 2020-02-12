@@ -88,8 +88,7 @@ exports.indexBy = (req, res) => {
 
 exports.store = (req, res) => {
   try {
-    console.log({ body: req.body, file: req.file })
-    
+   
     const { title, insired } = req.body,
       thumbnail = req.file.filename
 
@@ -123,7 +122,6 @@ exports.store = (req, res) => {
       })
 
   } catch(err) {
-    console.log({ err })
     functions.delFolder(req, 'brands')
       .finally(() => {
         res.status(500).send()
