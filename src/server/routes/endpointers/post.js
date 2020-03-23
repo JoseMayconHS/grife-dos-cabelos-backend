@@ -6,12 +6,15 @@ const route = require('express').Router(),
 	brandControllers = require('../controllers/brand'),
 	typeControllers = require('../controllers/type'),
 	pushNotificationControllers = require('../controllers/pushNotification'),
-	product = require('../../../upload').storageProduct,
 	fileFilter = require('../../../upload').fileFilter,
-	brand = require('../../../upload').storageBrand,
-	upProduct = multer({ storage: product, fileFilter }),
-	upBrand = multer({ storage: brand, fileFilter })
-	
+	storages = require('../../../upload').storages,
+	productStorage = storages.product,
+	brandStorage = storages.brand,
+	upProduct = multer({ storage: productStorage.local, fileFilter }),
+	upBrand = multer({ storage: brandStorage.local, fileFilter }),
+	upProductS3 = multer({ storage: productStorage.s3.init, fileFilter }),	
+	upBrandS3 = multer({ storage: brandStorage.s3.init, fileFilter })
+		
 route
 	// App
 	.post('/app/expo', pushNotificationControllers.store)
@@ -22,11 +25,11 @@ route
 	.post('/dashboard/signin', admControllers.sign)
 	.post('/dashboard/signup', admControllers.store)
 	.post('/admin/dashboard/reconnect', admControllers.reconnect)
-	.post('/admin/dashboard/product', upProduct.single('thumbnail'), productControllers.store)
-	.post('/admin/dashboard/brand', upBrand.single('thumbnail'), brandControllers.store)
+	.post('/admin/dashboard/product', upProductS3.single('thumbnail'), productControllers.store)
+	.post('/admin/dashboard/brand', upBrandS3.single('thumbnail'), brandControllers.store)
 	.post('/admin/dashboard/type', typeControllers.store)
 	.post('/admin/dashboard/expo', pushNotificationControllers.send)
-	
+
 	// .post('/app/user/buy', userControllers.buy)
 
 module.exports = app => app.use(route)

@@ -1,8 +1,10 @@
-const Product = require('../../../data/Schemas/Product'),
+const aws = require('aws-sdk'),
+	Product = require('../../../data/Schemas/Product'),
 	Type = require('../../../data/Schemas/Type'),
 	Brand = require('../../../data/Schemas/Brand'),
 	functions = require('../../../functions'),
-	limit = +process.env.LIMIT_PAGINATION || 10
+	limit = +process.env.LIMIT_PAGINATION || 10,
+	s3 = new aws.S3()
 
 
 exports.indexAll = (req, res) => {
@@ -74,25 +76,44 @@ exports.qtd = (req, res) => {
 exports.store = (req, res) => {
 	try {
 		const { title,  description, brand_id, type_id } = req.body,
-			thumbnail = req.file.filename
+		{ key: thumbnail, location: url = '' } = req.file  
 
-		const delDocAndFile = id => {
-			Product.findByIdAndDelete(id)
-				.then(_ => {
-					functions.delFolder(req, 'products')
+		const delDocAndFile = (id, errorMessage, cb) => {		
+
+			if (id) {
+				let status = 200
+
+				Product.findByIdAndDelete(id)
+				.then(_ => {})
+				.catch(_ => status = 500)
+				.finally(() => {
+					s3
+						.deleteObject({
+							Bucket: process.env.BUCKET_NAME,
+							Key: thumbnail
+						}).promise()
 						.finally(() => {
-							res.status(200).json({ ok: false, message: 'Erro ao atualizar a marca' })
-						})
+							res.status(status).json({ ok: false, message: errorMessage })
+						}) 
 				})
-				.catch(_ => {
-					functions.delFolder(req, 'products')
-						.finally(() => {
-							res.status(500).send()
-						})
-				})
+			} else {
+				s3
+					.deleteObject({
+						Bucket: process.env.BUCKET_NAME,
+						Key: thumbnail
+					}).promise()
+					.finally(() => {
+						if (errorMessage) {
+							return res.status(200).json({ ok: false, message: errorMessage })
+						}
+
+						if (cb) cb()
+						else res.status(500).send()
+					})
+			}
 		}
 
-		let { item_included, price_from, price_to, promotion, insired } = req.body
+		let { item_included, price_to, insired } = req.body
 
 		item_included = item_included
 			.split(',')
@@ -119,6 +140,7 @@ exports.store = (req, res) => {
 									type: type.name,
 									type_id,
 									thumbnail,
+									url,
 									price: {
 										// _from: price_from,
 										to: price_to
@@ -138,54 +160,36 @@ exports.store = (req, res) => {
 														res.status(201).json({ ok: true, data: product._doc })
 													})
 													.catch(_ => {
-														delDocAndFile(product._doc._id)
+														delDocAndFile(product._doc._id, 'Erro ao atualizar tipo')
 													})
 											})
 											.catch(_ => {
-												delDocAndFile(product._doc._id)
+												delDocAndFile(product._doc._id, 'Erro ao atualizar marca')
 											})
 									})
 									.catch(_ => {
-										functions.delFolder(req, 'products')
-											.finally(() => {
-												res.status(400).send()
-											})
+										delDocAndFile(null, 'Erro ao criar produto')
 									})
 
 							} else {
-								functions.delFolder(req, 'products')
-									.finally(() => {
-										res.status(200).json({ ok: false, message: 'Tipo não encontrado' })
-									})
+								delDocAndFile(null, 'Tipo não encontrado')
 							}
 
 						})
 						.catch(() => {
-							functions.delFolder(req, 'products')
-								.finally(() => {
-									res.status(500).send()
-								})
+							delDocAndFile(null, null, () => res.status(500).send())
 						})
 		
 				} else {
-					functions.delFolder(req, 'products')
-						.finally(() => {
-							res.status(200).json({ ok: false, message: 'Marca não encontrada' })
-						})
+					delDocAndFile(null, 'Marca não encontrada')
 				}
 			})
 			.catch(_ => {
-				functions.delFolder(req, 'products')
-					.finally(() => {
-						res.status(500).send()
-					})
+				delDocAndFile(null, null, () => res.status(500).send())
 			})
 
 	} catch(err) {
-		functions.delFolder(req, 'products')
-			.finally(() => {
-				res.status(500).send()
-			})
+		delDocAndFile(null, null, () => res.status(500).send())
 	}
 }
 
@@ -218,14 +222,12 @@ exports.update = (req, res) => {
 		} else {
 
 			if (document.type_id || document.brand_id) {
-				const { type_id, brand_id } = document
+				const { type_id, brand_id, insired } = document
 
 				Product.findById(_id)
 					.then(product => {
-
 						if (product) {
 							if (type_id) {
-					
 								Type.findById(product.type_id)
 									.then(beforeType => {
 										Type.updateOne({ _id: beforeType._id }, { products: beforeType.products - 1, insired })
@@ -254,6 +256,7 @@ exports.update = (req, res) => {
 														res.status(500).send()	
 													})
 											}).catch(() => {
+		
 												res.status(500).send()	
 											})
 									}).catch(() => {
@@ -390,23 +393,26 @@ exports.remove = (req, res) => {
 									.then(type => {
 										Type.updateOne({ _id: product.type_id }, { products: type.products - 1 })
 											.then(() => {
-												functions.delFolder(null, 'products', product.thumbnail)
-													.finally(() => {
-														Product.deleteOne({ _id })
-															.then(_ => {
-																res.status(200).json({ ok: true })
-															})
-															.catch(_ => {
-																res.status(500).send()
-															})
+												Product.deleteOne({ _id })
+													.then(() => {
+														s3
+														.deleteObject({
+															Bucket: process.env.BUCKET_NAME,
+															Key: product.thumbnail
+														}).promise()
+														.finally(() => {
+															res.status(200).json({ ok: true, message: 'apagado com sucesso' })
+														}) 
+													}).catch(() => {
+														res.status(500).send()
 													})
+												
 											}).catch(() => {
 												res.status(500).send()
 											})
 									}).catch(() => {
 										res.status(500).send()
 									})
-								
 							}).catch(() => {
 								res.status(500).send()
 							})
@@ -448,10 +454,10 @@ exports.update_thumbnail = (req, res) => {
 	try {
 
 		const { id: _id } = req.params,
-			{ filename } = req.file,
+			{ key: thumbnail, location: url } = req.file,
 			{ insired } = req.body
 
-			Product.updateOne({ _id }, { thumbnail: filename, insired })
+			Product.updateOne({ _id }, { thumbnail, url, insired })
 				.then(() => {
 					res.status(200).json({ ok: true })
 				})

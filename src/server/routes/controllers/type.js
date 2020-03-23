@@ -1,8 +1,10 @@
-const Type = require('../../../data/Schemas/Type'),
+const aws = require("aws-sdk"),
+  Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   Brand = require('../../../data/Schemas/Brand'),
   functions =  require('../../../functions'),
-  limit = +process.env.LIMIT_PAGINATION || 10
+  limit = +process.env.LIMIT_PAGINATION || 10,
+  s3 = new aws.S3()
 
 exports.store = (req, res) => {
   try {
@@ -167,19 +169,6 @@ exports.remove = (req, res) => {
               if (list && list.forEach) {
                 let error = false
 
-                const forEachToFunctions = list.map(({ thumbnail }) => {
-                  return function(next) {
-                    functions.delFolder(req, 'products', thumbnail)
-                      .then(() => {
-                        next && next()
-                      })
-                      .catch(() => {
-                        error = true
-                        next && next()
-                      })
-                  }
-                })
-
                 const recalcBrandProducts = list.map(({ brand_id }) => {
                   return function(next) {
                     Brand.findById(brand_id)
@@ -198,6 +187,33 @@ exports.remove = (req, res) => {
                       })
                   }
                 })
+
+                const ObjectsS3ForDelete = []
+
+                const setKeys = (next) => {
+                  list.forEach(product => {
+
+                    ObjectsS3ForDelete.push({
+                      Key: product.thumbnail
+                    })
+
+                  })
+
+                  next && next()
+                }
+
+                const delFilesFromS3 = (next) => {
+                  s3
+                    .deleteObjects({
+                      Bucket: process.env.BUCKET_NAME,
+                      Delete: {
+                        Objects: ObjectsS3ForDelete
+                      }
+                    }).promise()
+                    .finally(() => {
+                      next && next()
+                    })
+                }
 
                 const delDocuments = () => {
                   Product.deleteMany({ type_id: _id })
@@ -218,7 +234,7 @@ exports.remove = (req, res) => {
                     })
                 }
 
-                functions.middleware(...forEachToFunctions, ...recalcBrandProducts, delDocuments)
+                functions.middleware(setKeys, delFilesFromS3, ...recalcBrandProducts, delDocuments)
               } else {
                 res.status(500).send()
               }

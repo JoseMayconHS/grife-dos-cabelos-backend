@@ -1,8 +1,10 @@
-const Brand = require('../../../data/Schemas/Brand'),
+const aws = require("aws-sdk"),
+  Brand = require('../../../data/Schemas/Brand'),
   Type = require('../../../data/Schemas/Type'),
   Product = require('../../../data/Schemas/Product'),
   functions =  require('../../../functions'),
-  limit = +process.env.LIMIT_PAGINATION || 10
+  limit = +process.env.LIMIT_PAGINATION || 10,
+  s3 = new aws.S3();
 
 exports.indexAll = (req, res) => {
   try {
@@ -88,15 +90,13 @@ exports.indexBy = (req, res) => {
 
 exports.store = (req, res) => {
   try {
-   
+  
     const { title, insired } = req.body,
-      thumbnail = req.file.filename
-
-      
+    { key: thumbnail, location: url = '' } = req.file  
 
     const _document = {
       title: title.trim(),
-      thumbnail, insired
+      thumbnail, insired, url
     }
     
     Brand.findOne({ title: title.trim() })
@@ -110,10 +110,7 @@ exports.store = (req, res) => {
             res.status(201).json({ ok: true, data: brand._doc })
           })
           .catch(_ => {
-            functions.delFolder(req, 'brands')
-              .finally(() => {
-                res.status(400).send()
-              })
+            res.status(400).send()
           })
 
       })
@@ -122,10 +119,7 @@ exports.store = (req, res) => {
       })
 
   } catch(err) {
-    functions.delFolder(req, 'brands')
-      .finally(() => {
-        res.status(500).send()
-      })
+    res.status(500).send()
   }
 }
 
@@ -140,19 +134,6 @@ exports.remove = (req, res) => {
       .then(list => {
         if (list.forEach) {
           let error = false
-          
-          const forEachToFunctions = list.map(({ thumbnail }) => {
-            return function(next) {
-              functions.delFolder(req, 'products', thumbnail)
-                .then(() => {
-                  next && next()
-                })
-                .catch(() => {
-                  error = true
-                  next && next()
-                })
-            }
-          })
 
           const recalcTypeProducts = list.map(({ type_id }) => {
             return function(next) {
@@ -173,52 +154,64 @@ exports.remove = (req, res) => {
             }
           })
 
-          // const recalcBrandProducts = list.map(({ brand_id }) => {
-          //   return function(next) {
-          //     Brand.findById(brand_id)
-          //       .then(brand => {
-          //         Brand.updateOne({ _id: brand_id }, { products: brand.products - 1 })
-          //           .then(() => {
-          //             next && next()
-          //           })
-          //           .catch(() => {
-          //             error = true
-          //             next && next()
-          //           })
-          //       }).catch(_ => {
-          //         error = true
-          //         next && next()
-          //       })
-          //   }
-          // })
+          const ObjectsS3ForDelete = []
 
-          const delDocuments = () => {
-            Product.deleteMany({ brand_id: _id })
-              .then(_ => {
+          const setKeys = (next) => {
+            list.forEach(product => {
 
-                Brand.findById(_id)
-                  .then(brand => {
-                    functions.delFolder(null, 'brands', brand.thumbnail)
-                    .finally(() => {
-                      Brand.findByIdAndDelete(_id)
-                        .then(() => {
-                          res.status(200).json({ ok: true, message: error ? 'Ocorreu alguns erros' : 'apagado com sucesso' })
-                        })
-                        .catch(() => {
-                          res.satus(500).send()
-                        })
-                    })
-                  })
-                  .catch(() => {
-                    res.status(500).send()
-                  })
+              ObjectsS3ForDelete.push({
+                Key: product.thumbnail
               })
-              .catch(_ => {
-                res.sttaus(500).send()
+
+            })
+
+            next && next()
+          }
+
+          const delFilesFromS3 = (next) => {
+            s3
+              .deleteObjects({
+                Bucket: process.env.BUCKET_NAME,
+                Delete: {
+                  Objects: ObjectsS3ForDelete
+                }
+              }).promise()
+              .finally(() => {
+                next && next()
               })
           }
 
-          functions.middleware(...forEachToFunctions, ...recalcTypeProducts,  delDocuments)
+          const delDocuments = (next) => {
+            Product.deleteMany({ brand_id: _id })
+              .then(_ => {
+
+                Brand.findById(_id, 'thumbnail')
+                  .then(({ thumbnail }) => {
+                    Brand.deleteOne({ _id })
+                      .then(() => {
+                        s3
+                          .deleteObject({
+                            Bucket: process.env.BUCKET_NAME,
+                            Key: thumbnail
+                          }).promise()
+                          .finally(() => {
+                            res.status(200).json({ ok: true, message: error ? 'Ocorreu alguns erros' : 'apagado com sucesso' })
+                          }) 
+                      })
+                      .catch(() => {
+                        res.status(500).send()
+                      })
+                  })
+                  .catch(_ => {
+                    res.status(500).send()
+                  })
+                })
+              .catch(_ => {
+                res.status(500).send()
+              })
+          }
+
+          functions.middleware(setKeys, delFilesFromS3, ...recalcTypeProducts,  delDocuments)
         } else {
           res.status(500).send()
         }
@@ -289,9 +282,9 @@ exports.update_thumbnail = (req, res) => {
   try {
 
 		const { id: _id } = req.params,
-			{ filename } = req.file
+      { key: thumbnail, location: url = '' } = req.file;  
 
-			Brand.updateOne({ _id }, { thumbnail: filename })
+			Brand.updateOne({ _id }, { thumbnail, url })
 				.then(() => {
 					res.status(200).json({ ok: true })
 				})

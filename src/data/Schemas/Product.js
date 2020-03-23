@@ -19,6 +19,10 @@ const Product =  new Schema({
 		type: String,
 		required: true
 	},
+	url: {
+    type: String,
+    required: true
+  },
 	status: {
 		type: Boolean,
 		default: true
