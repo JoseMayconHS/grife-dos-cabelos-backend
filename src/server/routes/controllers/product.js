@@ -120,6 +120,7 @@ exports.store = (req, res) => {
 		item_included = item_included
 			.split(',')
 			.map(str => str.trim())
+			
 		// price_from = +price_from  (Ao criar um produto, não tem preço anterior)
 		price_to = +price_to
 		// promotion = promotion == '0' ? false : true (Ao criar, inicialmente não estará como promoção)
