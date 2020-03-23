@@ -42,6 +42,8 @@ exports.swiper = (req, res) => {
 		Type.findOne({ swiper: true }, '_id')
 			.then(typeSwiper => {
 				Product.find({ type_id: typeSwiper._id, status: true })
+					.limit(+process.env.SWIPER_LIMIT || 10)
+					.sort('-created_at')
 					.then(Documents => {
 						res.status(200).json({ ok: true, data: Documents })
 					})
