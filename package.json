@@ -4,7 +4,6 @@
     "dev": "nodemon src/server"
   },
   "dependencies": {
-    "@google-cloud/storage": "^4.3.2",
     "aws-sdk": "^2.637.0",
     "bcryptjs": "2.4.3",
     "cors": "2.8.5",
