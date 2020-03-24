@@ -203,6 +203,10 @@ exports.remove = (req, res) => {
                 }
 
                 const delFilesFromS3 = (next) => {
+                  if (!ObjectsS3ForDelete[0]) {
+                    return next && next()
+                  }
+
                   s3
                     .deleteObjects({
                       Bucket: process.env.BUCKET_NAME,
