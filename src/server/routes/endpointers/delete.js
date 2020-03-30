@@ -13,6 +13,6 @@ route
   .delete('/admin/dashboard/user/:id', userControllers.remove)
   .delete('/admin/dashboard/notification/:index', pushNotificationControllers.remove)
   .delete('/admin/dashboard/type/:id', typeControllers.remove)
-  .delete('/admin/dashboard/user/:id', admControllers.removeUser)
+  // .delete('/admin/dashboard/user/:id', admControllers.removeUser)
 
 module.exports = app => app.use(route)

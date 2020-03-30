@@ -1,4 +1,10 @@
 {
+  "version": "1.1.0",
+  "author": {
+    "name": "José Maycon Hermogenes da Silva",
+    "url": "https://www.facebook.com/profile.php?id=100008160376957"
+  },
+  "company": "Capiba Comunicação",
   "scripts": {
     "start": "node src/server",
     "dev": "nodemon src/server"
@@ -19,5 +25,5 @@
   "devDependencies": {
     "nodemon": "^2.0.1"
   },
-  "license": "MIT"
+  "license": "ISC"
 }

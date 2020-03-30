@@ -20,7 +20,7 @@ route
 	.post('/app/expo', pushNotificationControllers.store)
 	.post('/app/user/signup', userControllers.store)
 	.post('/app/user/signin', userControllers.sign)
-	.post('/app/user/forgot', userControllers.forgot)
+	// .post('/app/user/forgot', userControllers.forgot)
 	// Dashboard
 	.post('/dashboard/signin', admControllers.sign)
 	.post('/dashboard/signup', admControllers.store)

@@ -6,12 +6,21 @@ const route = require('express').Router(),
 	typeControllers = require('../controllers/type'),
 	pushNotificationControllers = require('../controllers/pushNotification')
 
+const html = `
+	<div style='height: 99.5vh; background: cornsilk; display: flex; justify-content: center; align-items: center; flex-direction: column;'>
+		<h1 style='margin-bottom: 0.6em;'>Grife dos Cabelos API - 1.1.0</h1>
+		<p style='max-width: 500px; line-height: 21px'>Desenvolvido em NodeJs por 
+		<a href='https://www.facebook.com/profile.php?id=100008160376957' target='_blank' style='color: tomato; text-decoration: none;'>Maycon Silva</a></p>
+		<p><a href='https://www.capiba.com.br' target='_blank' style='color: violet; text-decoration: none;'>Capiba Comunicação</a> 2020</p>
+	</div>
+`	
+
 route
-	.get('/debug', (req, res) => res.send('<h1>Funcionando....1</h1>'))
+	.get('/__origin__', (req, res) => res.send(html))
 	.get('/already', admControllers.qtd)
 	// Ambos
 	// Marca
-	.get('/app/user/generate', userControllers.generate)
+	// .get('/app/user/generate', userControllers.generate)
 	.get('/private/both/brand/:page', brandControllers.indexAll)
 	.get('/private/both/brand/by/:page', brandControllers.indexBy)
 	.get('/private/both/brand/search/:word/:page', brandControllers.search)
