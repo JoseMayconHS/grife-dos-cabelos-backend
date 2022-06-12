@@ -2,10 +2,10 @@
 API para auxiliar no desenvolvimento do aplicativo.
 
 ## App
- - [Projeto](https://github.com/Maycon-PE/Projeto-Fornecedor-App "Ir ao repositório")
+ - [Projeto](https://github.com/JoseMayconHS/grife-dos-cabelos-app "Ir ao repositório")
 
 ## Dashboard 
- - [Projeto](https://github.com/Maycon-PE/Projeto-Fornecedor-Dash  "Ir ao repositório")
+ - [Projeto](https://github.com/JoseMayconHS/grife-dos-cabelos-frontend  "Ir ao repositório")
 
 ## Endpointers
 
